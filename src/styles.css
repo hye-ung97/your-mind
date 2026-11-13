@@ -1,0 +1,290 @@
+:root{
+  --night:#1A1838; --d1:#211F4F; --d2:#2B2A63; --d3:#3A3778; --d4:#4E4590; --d5:#6A519E;
+  --band:#4B4796; --band-hi:#8E86D8;
+  --parch:#FFF6E3; --parch-2:#F6E8C8; --parch-3:#E2CFA6; --parch-4:#B79E72;
+  --ink:#2B2140; --ink-2:#5E5478; --ink-3:#8C83A3; --cream:#FFF6E3; --lilac:#CFC8F0;
+  --gold:#FFC94A; --gold-hi:#FFE6A0; --gold-lo:#C98A1E;
+  --indigo:#4B4FA0; --indigo-hi:#7A7FD0; --indigo-lo:#2F3270;
+  --pink:#FF7EB6; --pink-l:#FFD6E8; --mint:#7ED9C3;
+  --drop:rgba(10,8,30,.35);
+  --f:'Galmuri11', ui-monospace, monospace;
+  --f14:'Galmuri14', 'Galmuri11', ui-monospace, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--night); color:var(--ink); font-family:var(--f); -webkit-font-smoothing:none}
+button{font:inherit; color:inherit; border:0; background:none; padding:0; cursor:pointer}
+p{margin:0} h1,h2,h3{margin:0; font-weight:700} ol,ul{margin:0; padding:0; list-style:none}
+
+
+/* ── 프레임 · 하늘 ── */
+.sky{background:linear-gradient(var(--d1) 0 16%, var(--d2) 16% 38%, var(--d3) 38% 60%, var(--d4) 60% 82%, var(--d5) 82%)}
+.stars{position:absolute; left:0; top:0; width:2px; height:2px; pointer-events:none}
+.t-sky{color:var(--cream); text-shadow:3px 3px 0 var(--night)}
+.sub-sky{color:var(--lilac); font:14px/1.7 var(--f14)}
+
+/* ── 게임 창 ── */
+.win{position:relative; background:var(--parch);
+  box-shadow:inset 0 0 0 3px var(--parch-3), 0 0 0 3px var(--band), 0 0 0 6px var(--night), 0 12px 0 6px var(--drop)}
+.win > .bar{display:flex; align-items:center; gap:8px; height:40px; margin:3px 3px 0; padding:0 14px;
+  background:linear-gradient(var(--indigo-hi) 0 3px, var(--indigo) 3px); color:var(--cream);
+  font:700 14px/1 var(--f14); text-shadow:2px 2px 0 var(--night); box-shadow:0 3px 0 0 var(--night)}
+.win > .bar .right{margin-left:auto; display:flex; gap:10px; align-items:center}
+.win .body{padding:20px}
+.win.pick{box-shadow:inset 0 0 0 3px var(--gold-hi), 0 0 0 3px var(--gold), 0 0 0 6px var(--night), 0 12px 0 6px var(--drop)}
+.win.pick > .bar{background:linear-gradient(var(--gold-hi) 0 3px, var(--gold) 3px); color:var(--ink); text-shadow:none}
+
+/* ── 버튼 · 슬롯 · 작은 요소 ── */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; height:52px; padding:0 24px; white-space:nowrap;
+  font:700 22px/1 var(--f); color:var(--ink); background:var(--gold);
+  box-shadow:inset 3px 3px 0 var(--gold-hi), inset -3px -3px 0 var(--gold-lo), 0 0 0 3px var(--night), 0 6px 0 3px var(--drop)}
+.btn.indigo{background:var(--indigo); color:var(--cream); text-shadow:2px 2px 0 var(--night);
+  box-shadow:inset 3px 3px 0 var(--indigo-hi), inset -3px -3px 0 var(--indigo-lo), 0 0 0 3px var(--night), 0 6px 0 3px var(--drop)}
+.btn.parch{background:var(--parch); box-shadow:inset 3px 3px 0 #FFFFFF, inset -3px -3px 0 var(--parch-3), 0 0 0 3px var(--night), 0 6px 0 3px var(--drop)}
+.btn.sm{height:36px; padding:0 14px; font:14px/1 var(--f14); gap:8px; box-shadow:inset 2px 2px 0 var(--gold-hi), inset -2px -2px 0 var(--gold-lo), 0 0 0 2px var(--night)}
+.btn.parch.sm{box-shadow:inset 2px 2px 0 #FFFFFF, inset -2px -2px 0 var(--parch-3), 0 0 0 2px var(--night)}
+.btn.indigo.sm{box-shadow:inset 2px 2px 0 var(--indigo-hi), inset -2px -2px 0 var(--indigo-lo), 0 0 0 2px var(--night)}
+.btn.block{width:100%}
+.slot{position:relative; display:flex; align-items:center; justify-content:center; background:var(--parch-2);
+  box-shadow:inset 2px 2px 0 var(--parch-3), inset -2px -2px 0 #FFFDF6, 0 0 0 2px var(--parch-4)}
+.slot.on{background:#FFF1C9; box-shadow:inset 2px 2px 0 var(--gold-hi), inset -2px -2px 0 var(--gold-lo), 0 0 0 3px var(--gold), 0 0 0 5px var(--night)}
+.gem{display:inline-block; flex:none; width:12px; height:12px; background:var(--c, var(--gold));
+  box-shadow:inset -2px -2px 0 rgba(0,0,0,.25), inset 2px 2px 0 rgba(255,255,255,.55), 0 0 0 2px var(--night)}
+.tag{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; font:11px/1 var(--f); background:var(--night); color:var(--cream)}
+.tag.gold{background:var(--gold); color:var(--ink); box-shadow:0 0 0 2px var(--night)}
+.chip{display:inline-flex; align-items:center; gap:8px; height:34px; padding:0 12px; background:var(--parch);
+  box-shadow:0 0 0 2px var(--night), inset -2px -2px 0 var(--parch-3); font:14px/1 var(--f14); color:var(--ink)}
+.hearts{display:inline-flex; gap:3px; align-items:center}
+.ic{display:inline-block; flex:none; vertical-align:middle}
+.ic svg,.px-art svg{display:block; width:100%; height:100%}
+.px-art{display:block; flex:none}
+.label{font:700 14px/1 var(--f14); color:var(--ink-2)}
+.hint{font:14px/1.6 var(--f14); color:var(--ink-3)}
+.note{position:relative; background:var(--gold-hi); box-shadow:0 0 0 2px var(--night); padding:12px 14px; font:14px/1.6 var(--f14); color:var(--ink)}
+.note b{display:block; margin-bottom:2px}
+.linkish{font:14px/1 var(--f14); color:var(--lilac); text-decoration:underline; text-underline-offset:4px}
+.win .linkish{color:var(--ink-2)}
+.field{display:flex; align-items:center; justify-content:space-between; height:48px; padding:0 16px; background:#FFFFFF;
+  box-shadow:inset 2px 2px 0 var(--parch-3), 0 0 0 2px var(--parch-4); font:22px/1 var(--f)}
+.field span:last-child{font:14px/1 var(--f14); color:var(--ink-3)}
+.seg{display:inline-flex; box-shadow:0 0 0 2px var(--night)}
+.seg > *{height:32px; padding:0 12px; display:flex; align-items:center; font:14px/1 var(--f14); background:var(--parch); color:var(--ink-2)}
+.seg > .on{background:var(--gold); color:var(--ink); font-weight:700}
+.toggle{display:inline-flex; align-items:center; gap:8px; font:14px/1 var(--f14)}
+.toggle .sw{width:40px; height:22px; background:var(--parch-3); box-shadow:0 0 0 2px var(--night); position:relative}
+.toggle .sw::after{content:''; position:absolute; top:3px; left:3px; width:16px; height:16px; background:var(--parch); box-shadow:0 0 0 2px var(--night)}
+.toggle.on .sw{background:var(--gold)}
+.toggle.on .sw::after{left:21px}
+.swatch{width:30px; height:30px; box-shadow:inset -3px -3px 0 rgba(0,0,0,.18), 0 0 0 2px var(--night)}
+.swatch.on{box-shadow:inset -3px -3px 0 rgba(0,0,0,.18), 0 0 0 2px var(--night), 0 0 0 5px var(--gold)}
+
+/* ── 상단 바 ── */
+.nav{position:relative; z-index:2; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 40px;
+  background:var(--night); box-shadow:0 3px 0 0 var(--band)}
+.logo{display:flex; align-items:center; gap:10px; font:700 22px/1 var(--f); color:var(--cream); text-shadow:2px 2px 0 #000}
+.date{font:14px/1 var(--f14); color:var(--lilac)}
+.steps{display:flex; align-items:center; font:14px/1 var(--f14); color:var(--ink-3)}
+.steps li{display:flex; align-items:center; gap:8px}
+.steps li + li::before{content:''; width:28px; height:3px; margin:0 12px; background:var(--band)}
+.steps li .gem{--c:var(--d4)}
+.steps li.on{color:var(--gold); font-weight:700} .steps li.on .gem{--c:var(--gold)}
+.steps li.done{color:var(--lilac)} .steps li.done .gem{--c:var(--mint)}
+.new-mark{display:inline-flex; align-items:center; height:24px; padding:0 10px; background:var(--gold); color:var(--ink); font:700 11px/1 var(--f); text-shadow:none; box-shadow:0 0 0 2px #000}
+
+
+/* ════════════ 앱 전용 (캔버스 프레임 배치를 반응형으로 옮긴 것) ════════════ */
+html{background:var(--night)}
+.page{position:relative; min-height:100dvh; display:flex; flex-direction:column; overflow-x:hidden}
+.sky{background-attachment:scroll}
+.wrap{position:relative; z-index:1; width:100%; max-width:1280px; margin:0 auto; padding:32px 48px 56px; flex:1}
+.m-only{display:none !important}
+button:disabled{cursor:default; opacity:.5}
+:focus-visible{outline:3px solid var(--gold); outline-offset:3px}
+.logo{cursor:pointer}
+.nav{flex:none}
+.m-step{display:none; font:14px/1 var(--f14); color:var(--lilac)}
+.cta-bar{display:flex; gap:20px; justify-content:flex-end}
+.chip.sm{height:26px}
+/* 창 상단 바(.win > .bar)의 글자 그림자가 안에 든 태그·칩까지 물려 내려와 어두운 글씨가 두 겹으로 보이던 것 막기 */
+.tag,.chip{text-shadow:none}
+.btn{transition:transform .05s}
+.btn:active:not(:disabled){transform:translateY(2px)}
+input{font:inherit; color:inherit; border:0; background:none; outline:none; flex:1; min-width:0}
+input::placeholder{color:var(--ink-3)}
+.field:focus-within{box-shadow:inset 2px 2px 0 var(--parch-3), 0 0 0 2px var(--gold), 0 0 0 4px var(--night)}
+.hearts.pick button{display:inline-flex}
+.toast{position:fixed; left:50%; bottom:32px; transform:translate(-50%, 20px); opacity:0; pointer-events:none; z-index:50;
+  padding:12px 18px; background:var(--parch); color:var(--ink); font:700 14px/1.4 var(--f14); text-align:center; max-width:calc(100vw - 40px);
+  box-shadow:0 0 0 3px var(--night), 0 6px 0 3px var(--drop); transition:opacity .2s, transform .2s}
+.toast.show{opacity:1; transform:translate(-50%, 0)}
+
+/* 01 랜딩 */
+.landing .hero{position:relative; z-index:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px; padding:40px 24px 0}
+.landing .hero h1{font:700 44px/1.3 var(--f)}
+.landing .hero .lead{font:22px/1.6 var(--f); color:var(--lilac)}
+.hero-cta{display:flex; gap:24px; margin-top:6px; flex-wrap:wrap; justify-content:center}
+.plaza{position:relative; margin-top:auto; width:100%; max-width:1280px; align-self:center}
+.bubble{position:absolute; top:33%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; height:32px; padding:0 12px; background:var(--parch);
+  box-shadow:0 0 0 2px var(--night), inset -2px -2px 0 var(--parch-3); font:700 14px/1 var(--f14); white-space:nowrap; z-index:1}
+.bubble::after{content:''; position:absolute; left:50%; bottom:-8px; margin-left:-5px; width:10px; height:6px; background:var(--night); clip-path:polygon(0 0, 100% 0, 50% 100%)}
+
+/* 02 시작하기 */
+.center-title{text-align:center; display:flex; flex-direction:column; gap:8px; align-items:center; margin:8px 0 40px}
+.center-title h1{font:700 33px/1.3 var(--f)}
+.g-wins{display:flex; justify-content:center; gap:64px}
+.g-pick{width:346px; cursor:pointer}
+.g-pick .body{padding:16px 13px 14px; display:flex; flex-direction:column; align-items:center; gap:12px}
+.g-pick .slot{width:320px; aspect-ratio:1}
+.g-pick .cap{font:11px/1.5 var(--f); color:var(--ink-2); text-align:center}
+.check{position:absolute; top:-16px; right:-16px; width:40px; height:40px; background:var(--gold); display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 3px var(--night); z-index:2}
+.check.sm{width:32px; height:32px; top:-12px; right:-12px}
+.start-foot{display:flex; justify-content:space-between; align-items:center; gap:24px; margin-top:48px}
+
+/* 03 기분 */
+.page-title{margin-bottom:32px}
+.page-title h1{font:700 33px/1.3 var(--f)}
+.mood-cols{display:grid; grid-template-columns:minmax(0, 728px) 392px; justify-content:space-between; gap:48px; align-items:start}
+.mood-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:16px}
+.mood{height:140px; flex-direction:column; justify-content:flex-end; gap:10px; padding-bottom:12px; background:var(--ms); font:700 14px/1 var(--f14)}
+.mood .name{display:flex; align-items:center; gap:6px}
+.mood.free{background:var(--parch); color:var(--ink-3); justify-content:center}
+.custom-field{display:block; margin-top:20px}
+.custom-field .field{margin-top:10px}
+.amount{display:flex; align-items:center; gap:18px; margin:22px 0 18px; flex-wrap:wrap}
+.amount .scale{font:11px/1 var(--f); color:var(--ink-3)}
+.prev-win .body{display:flex; flex-direction:column; align-items:center; gap:16px}
+.prev-win .slot{width:100%; aspect-ratio:1}
+.prev-win .why{font:14px/1.7 var(--f14); color:var(--ink-2); align-self:stretch}
+
+/* 04 꾸미기 */
+.editor{display:grid; grid-template-columns:544px minmax(0, 608px); justify-content:space-between; gap:32px; align-items:start}
+.stage-win .bar{gap:8px}
+.stage-win .bar .right .btn.sm{height:28px}
+.stage-win .body{padding:16px 29px 18px; display:flex; flex-direction:column; gap:16px}
+.stage-win .stage-slot{width:100%; aspect-ratio:1}
+.tools{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px}
+.edit-win{display:flex; flex-direction:column; min-height:612px}
+.edit-win .body{flex:1; display:flex; flex-direction:column; padding:16px 20px 18px}
+.tabs{display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; margin-bottom:16px}
+.tab{height:58px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; font:11px/1 var(--f); color:var(--ink-2);
+  background:var(--parch-2); box-shadow:inset -2px -2px 0 var(--parch-3), 0 0 0 2px var(--parch-4)}
+.tab.on{background:var(--indigo); color:var(--cream); font-weight:700; text-shadow:1px 1px 0 var(--night);
+  box-shadow:inset 2px 2px 0 var(--indigo-hi), inset -2px -2px 0 var(--indigo-lo), 0 0 0 2px var(--night)}
+.ptitle{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px}
+.ptitle h3{font:700 22px/1 var(--f)}
+.item .rec{position:absolute; top:-8px; left:-6px; z-index:1}
+.items{display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:14px 12px; max-height:398px; overflow-y:auto;
+  padding:10px 8px 6px; margin:-10px -8px 0; scrollbar-width:thin; justify-items:center; align-content:start}
+.item{width:100px; display:flex; flex-direction:column; align-items:center; gap:7px; font:11px/1.2 var(--f); color:var(--ink-2); text-align:center}
+.item .slot{width:100px; height:100px}
+.item .slot .px-art[style*="aspect-ratio"]{width:80px !important}
+.item.on{color:var(--ink); font-weight:700}
+.colors{display:flex; flex-wrap:wrap; gap:16px 28px; margin-top:auto; padding-top:16px}
+.colors .row{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+.colors .row.small{gap:8px}
+.colors .row.small .swatch{width:26px; height:26px}
+.edit-foot{grid-column:1 / -1}
+
+/* 05 공유 */
+.share{display:grid; grid-template-columns:360px minmax(0, 664px); justify-content:space-around; gap:48px; align-items:start; padding-top:40px}
+.card{width:360px; min-height:648px; display:flex; flex-direction:column; align-items:center; padding:22px 20px 18px; margin:0 auto}
+.card .top{width:100%; display:flex; justify-content:space-between; font:11px/1 var(--f); color:var(--ink-2); margin-bottom:14px}
+.card .slot{width:320px; aspect-ratio:1}
+.card .mname{display:flex; align-items:center; gap:10px; font:700 33px/1 var(--f); margin:24px 0 12px}
+.speech{position:relative; margin-top:22px; padding:10px 14px; background:#FFFFFF; box-shadow:0 0 0 2px var(--night); font:14px/1.5 var(--f14); text-align:center; word-break:keep-all; overflow-wrap:anywhere}
+.speech::before{content:''; position:absolute; top:-8px; left:50%; margin-left:-6px; width:12px; height:6px; background:var(--night); clip-path:polygon(50% 0, 100% 100%, 0 100%)}
+.card .foot{margin-top:auto; padding-top:20px; width:100%; display:flex; justify-content:space-between; align-items:center; font:700 14px/1 var(--f14)}
+.card .brand{display:flex; gap:8px; align-items:center}
+.card .make{font:11px/1 var(--f); color:var(--ink-2)}
+.share-side{padding-top:4px}
+.share-side .deco{display:flex; gap:14px}
+.share-side h1{font:700 33px/1.35 var(--f); margin:14px 0 10px}
+.ratio{margin-top:22px}
+.share-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px 24px; margin:26px 0 34px}
+.share-grid .btn{height:58px; justify-content:flex-start; padding:0 18px}
+.share-more{display:flex; gap:28px; align-items:center}
+.card-view{display:flex; flex-direction:column; align-items:center; gap:28px}
+.card-view .center-title{margin-bottom:0}
+.card-view .cta-bar{justify-content:center}
+
+/* ════════════ 좁은 화면 (캔버스 M1~M4) ════════════ */
+@media (max-width: 1180px){
+  .editor{grid-template-columns:minmax(0, 440px) minmax(0, 1fr)}
+  .mood-cols{grid-template-columns:minmax(0, 1fr) 340px; gap:32px}
+}
+@media (max-width: 900px){
+  .d-only{display:none !important}
+  .m-only{display:initial !important}
+  .cta-bar.m-only{display:flex !important}
+  .wrap{padding:14px 20px 120px}
+  .nav{height:52px; padding:0 16px}
+  .nav .date,.steps{display:none}
+  .m-step{display:block}
+  .field{font-size:16px; padding:0 12px; gap:8px}
+  .logo{font-size:16px}
+  .steps li + li::before{width:12px; margin:0 6px}
+  .steps{font-size:11px}
+  .cta-bar{position:fixed; left:0; right:0; bottom:0; z-index:20; padding:16px 20px calc(16px + env(safe-area-inset-bottom)); background:var(--night); box-shadow:0 -3px 0 0 var(--band)}
+  .cta-bar .btn{flex:1}
+  .t-sky{text-shadow:2px 2px 0 var(--night)}
+  .landing .hero{padding-top:28px; gap:14px}
+  .landing .hero h1{font-size:28px}
+  .landing .hero .lead{font-size:14px}
+  .hero-cta{flex-direction:column; align-self:stretch; gap:16px}
+  .bubble{display:none}
+  .center-title{text-align:left; align-items:flex-start; margin-bottom:20px}
+  .center-title h1,.page-title h1{font-size:22px}
+  .g-wins{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .g-pick{width:auto}
+  .g-pick .body{padding:10px}
+  .g-pick .slot{width:100%}
+  .g-pick .cap{display:none}
+  .check{width:30px; height:30px; top:-12px; right:-12px}
+  .start-foot{margin-top:26px}
+  .chip.policy{height:auto; padding:8px 10px; font-size:11px; line-height:1.5}
+  .page-title{margin-bottom:18px}
+  .mood-cols{display:block}
+  .prev-win{display:none}
+  .mood-win > .bar{display:none}
+  .mood-win{background:none; box-shadow:none}
+  .mood-win .body{padding:0}
+  .mood-grid{grid-template-columns:1fr 1fr; gap:14px}
+  .mood{height:96px; flex-direction:row; justify-content:flex-start; padding:0 10px; gap:10px}
+  .mood .px-art{width:54px !important; height:auto !important; aspect-ratio:36/40}
+  .mood.free{justify-content:center}
+  .amount,.mood-win label > .label,.custom-field .label{color:var(--lilac)}
+  .amount .label{color:var(--lilac)}
+  .editor{display:block; padding-top:10px}
+  .stage-win{margin-bottom:24px}
+  .stage-win .body{padding:12px}
+  .stage-win .bar .right .btn{display:none}
+  .tools{grid-template-columns:repeat(4, 1fr); gap:8px}
+  .tools .btn{padding:0 6px}
+  .tools .btn .t{display:none}
+  .edit-win{min-height:0}
+  .edit-win > .bar .tag{display:none}
+  .edit-win .body{padding:12px}
+  .tabs{gap:4px}
+  .tab{height:46px}
+  .ptitle h3{font-size:16px}
+  .items{grid-template-columns:repeat(auto-fill, minmax(76px, 1fr)); max-height:none; overflow:visible}
+  .item{width:76px}
+  .item .slot{width:76px; height:76px}
+  .item .slot .px-art.thumb{transform:scale(.74)}
+  .item .slot .px-art[style*="aspect-ratio"]{width:62px !important}
+  .edit-foot{justify-content:stretch}
+  .share{display:block; padding-top:14px}
+  .card{width:min(320px, 100%); min-height:0; padding:14px 15px}
+  .card .slot{width:100%}
+  .card .mname{font-size:22px; margin:16px 0 8px}
+  .share-side{margin-top:28px}
+  .share-side h1{font-size:22px}
+  .share-grid{gap:16px; margin:20px 0 24px}
+  .share-grid .btn{height:52px; font-size:14px; padding:0 12px}
+  .share-grid .btn.save{grid-column:1 / -1}
+  .share-more{justify-content:space-between}
+}
+@media (max-width: 420px){
+  .share-grid{grid-template-columns:1fr}
+  .tab{font-size:10px}
+}

@@ -1,0 +1,13 @@
+/* Galmuri 픽셀 글꼴 (OFL) — 앱에서 쓰는 3개만 불러와요 */
+@font-face {
+  font-family: Galmuri11; font-weight: 400; font-display: swap;
+  src: url('galmuri/dist/Galmuri11.woff2') format('woff2');
+}
+@font-face {
+  font-family: Galmuri11; font-weight: 700; font-display: swap;
+  src: url('galmuri/dist/Galmuri11-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: Galmuri14; font-weight: 400; font-display: swap;
+  src: url('galmuri/dist/Galmuri14.woff2') format('woff2');
+}

@@ -1,0 +1,17 @@
+import type { Crop, Grid, Look, Part } from './types';
+export const W: number;
+export const H: number;
+export const K: string;
+export const FACES: Record<string, Part>;
+export const HAIRS: Record<string, Part>;
+export const TOPS: Record<string, Part>;
+export const BOTTOMS: Record<string, Part>;
+export const SHOES: Record<string, Part>;
+export const ACCS: Record<string, Part>;
+export const SKINS: Record<string, { b: string; s: string }>;
+export const HAIR: Record<string, { b: string; s: string; h: string; g: string }>;
+export const EYES: Record<string, { E: string; e: string }>;
+export const CLOTH: Record<string, { name: string; c: string }>;
+export const DEFAULTS: Record<'f' | 'm', Look>;
+export const CROPS: Record<'full' | 'head' | 'bust' | 'top' | 'bottom' | 'shoes' | 'acc' | 'hair', Crop>;
+export function compose(look: Look, opts?: { only?: string[] }): Grid;

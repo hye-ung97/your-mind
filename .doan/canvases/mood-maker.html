@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="doan:canvas" content="mood-maker">
+<meta name="doan:width" content="5520">
+<title>your mind — 오늘의 기분 픽셀 캐릭터 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+:root{
+  --ink:#2B2140; --ink-2:#5B4F72; --ink-3:#958BA8;
+  --paper:#FFF8EC; --paper-2:#FBEED9; --card:#FFFFFF; --board:#E4DCCD; --line-soft:#EADFCB;
+  --pink:#FF7EB6; --pink-d:#E0558F; --pink-l:#FFD6E8;
+  --yellow:#FFD23F; --yellow-d:#E0B020; --yellow-l:#FFF0B3;
+  --mint:#7ED9C3; --mint-d:#4FB89C; --mint-l:#D3F4EA;
+  --lavender:#B8A7E8; --blue:#7AA7FF; --red:#FF6B57; --gray:#C9CDD6;
+  --shadow:rgba(43,33,64,.16);
+  --f:'Galmuri11', ui-monospace, monospace;
+  --f14:'Galmuri14', 'Galmuri11', ui-monospace, monospace;
+  --out:0 -4px 0 0 var(--ink), 0 4px 0 0 var(--ink), -4px 0 0 0 var(--ink), 4px 0 0 0 var(--ink);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--board); color:var(--ink); font-family:var(--f); -webkit-font-smoothing:none;}
+button{font:inherit; color:inherit; border:0; background:none; padding:0; cursor:pointer}
+p{margin:0}
+h1,h2,h3{margin:0; font-weight:700}
+
+/* ── 보드 ── */
+.board{width:5520px; padding:80px; display:grid; grid-template-columns:repeat(4, 1280px); gap:96px 80px; align-items:start}
+.board-head{grid-column:1 / -1; display:flex; align-items:flex-end; justify-content:space-between}
+.board-head h1{font:700 44px/1.3 var(--f)}
+.board-head p{font:14px/1.8 var(--f14); color:var(--ink-2)}
+.phones{display:flex; gap:77px; align-items:flex-start}
+.wide{grid-column:1 / span 2}
+
+/* ── B안 ── */
+.b-mark{display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 12px; background:var(--lavender); box-shadow:var(--out); font:700 14px/1 var(--f14)}
+.cmp{padding:56px 64px}
+.cmp-head{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:36px}
+.cmp-head h2{font:700 33px/1.3 var(--f); margin-top:16px}
+.cmp-head p{font:14px/1.7 var(--f14); color:var(--ink-2)}
+.cmp-body{display:grid; grid-template-columns:600px 1fr; gap:56px}
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:32px}
+.who{background:var(--card); box-shadow:var(--out); padding:20px 20px 16px}
+.who.b{background:var(--pink-l)}
+.who h3{font:700 22px/1 var(--f); display:flex; align-items:center; justify-content:space-between; margin-bottom:16px}
+.who .fig{position:relative; height:304px; display:flex; align-items:flex-end; justify-content:center; padding-left:40px;
+  background:linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0/16px 16px, linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0/16px 16px}
+.ratio{position:absolute; left:0; bottom:0; width:28px; display:flex; flex-direction:column}
+.ratio i{display:flex; align-items:center; justify-content:center; font:700 11px/1 var(--f); font-style:normal; box-shadow:inset 0 -2px 0 0 var(--card)}
+.ratio .h{background:var(--pink)} .ratio .t{background:var(--yellow)} .ratio .l{background:var(--mint)}
+.who .nums{display:flex; gap:8px; margin-top:16px; font:14px/1 var(--f14)}
+.who .nums span{display:flex; align-items:center; gap:6px}
+.who .nums b{width:12px; height:12px; display:inline-block}
+.who .facts{margin:14px 0 0; padding:0; list-style:none; font:14px/1.7 var(--f14); color:var(--ink-2)}
+.diff{margin:0 0 28px; padding:0; list-style:none; display:flex; flex-direction:column; gap:14px; font:14px/1.6 var(--f14)}
+.diff li{display:flex; gap:12px; align-items:flex-start}
+.diff li > b{flex:none; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; background:var(--ink); color:var(--card); font:11px/1 var(--f)}
+.diff em{font-style:normal; font-weight:700}
+.strip{display:flex; gap:10px; margin:12px 0 24px}
+/* ── C안 · 캐릭터 시작하기 ── */
+.c-mark,.new-mark{display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 12px; box-shadow:var(--out); font:700 14px/1 var(--f14)}
+.c-mark{background:var(--mint)}
+.new-mark{background:var(--yellow)}
+.csheet{padding:48px 64px}
+.csheet-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:32px}
+.csheet-head h2{font:700 33px/1.3 var(--f); margin-top:16px}
+.csheet-head p{font:14px/1.7 var(--f14); color:var(--ink-2)}
+.cs-top{display:grid; grid-template-columns:auto 1fr; gap:40px; align-items:start}
+.figs{display:flex; gap:20px; align-items:stretch}
+.fig-card{background:var(--card); box-shadow:var(--out); padding:16px 16px 14px; display:flex; flex-direction:column; align-items:center; width:276px}
+.fig-card.ref{background:var(--paper-2); width:248px}
+.fig-card .floor{width:100%; height:340px; display:flex; align-items:flex-end; justify-content:center; background:linear-gradient(var(--paper) 0 86%, var(--line-soft) 86%)}
+.fig-card h3{font:700 22px/1 var(--f); margin-top:14px; display:flex; gap:8px; align-items:center}
+.fig-card p{font:11px/1.6 var(--f); color:var(--ink-2); margin-top:8px; text-align:center}
+.c-notes{display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px}
+.c-notes > div{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; background:var(--paper-2); font:14px/1.6 var(--f14)}
+.c-notes b{flex:none; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; background:var(--ink); color:var(--card); font:11px/1 var(--f)}
+.c-notes em{font-style:normal; font-weight:700}
+.heads.grid2{display:grid; grid-template-columns:repeat(2, 72px); gap:12px}
+.cs-bottom{display:grid; grid-template-columns:auto 1fr; gap:40px; margin-top:32px}
+.heads{display:flex; gap:12px; margin:10px 0 18px}
+.heads .t{width:72px; height:80px; box-shadow:var(--out); background:var(--paper-2); display:flex; align-items:flex-end; justify-content:center; overflow:hidden}
+.combos{display:flex; gap:16px; margin-top:10px}
+.combos .t{width:104px; height:136px; box-shadow:var(--out); background:var(--paper-2); display:flex; align-items:flex-end; justify-content:center}
+.start-title{position:absolute; left:0; right:0; top:108px; text-align:center}
+.start-title h1{font:700 33px/1.3 var(--f)}
+.start-title p{font:14px/1.7 var(--f14); color:var(--ink-2); margin-top:8px}
+.g-cards{position:absolute; left:256px; top:228px; display:flex; gap:48px}
+.g-card{position:relative; width:360px; height:432px; background:var(--card); box-shadow:var(--out); display:flex; flex-direction:column; align-items:center; padding:20px 20px 18px}
+.g-card .stage{width:320px; height:336px; display:flex; align-items:flex-end; justify-content:center; background:linear-gradient(var(--paper-2) 0 86%, var(--line-soft) 86%); box-shadow:0 0 0 4px var(--ink)}
+.g-card.on{background:var(--pink-l); filter:drop-shadow(8px 8px 0 var(--ink)); transform:translate(-2px, -4px)}
+.g-card.on .stage{background:linear-gradient(#FFE5EF 0 86%, #F7C6DA 86%)}
+.g-card .name{font:700 33px/1 var(--f); margin-top:auto}
+.g-card .check,.m-g .check{position:absolute; top:-14px; right:-14px; width:44px; height:44px; background:var(--ink); display:flex; align-items:center; justify-content:center; z-index:1}
+.start-foot{position:absolute; left:80px; right:80px; top:696px; display:flex; align-items:center; justify-content:space-between}
+.start-foot .left{display:flex; flex-direction:column; gap:12px}
+.policy{display:inline-flex; align-items:center; gap:10px; height:40px; padding:0 14px; background:var(--card); box-shadow:var(--out); font:14px/1 var(--f14)}
+.skip{display:flex; align-items:center; gap:10px; font:14px/1 var(--f14); color:var(--ink-2)}
+.m-g{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.m-g .g{position:relative; height:292px; background:var(--card); box-shadow:var(--out); display:flex; flex-direction:column; align-items:center; padding:10px 8px 14px}
+.m-g .g .stage{width:144px; height:216px; display:flex; align-items:flex-end; justify-content:center; background:linear-gradient(var(--paper-2) 0 86%, var(--line-soft) 86%); box-shadow:0 0 0 4px var(--ink)}
+.m-g .g.on{background:var(--pink-l); filter:drop-shadow(4px 4px 0 var(--ink))}
+.m-g .g.on .stage{background:linear-gradient(#FFE5EF 0 86%, #F7C6DA 86%)}
+.m-g .g b{font:700 22px/1 var(--f); margin-top:auto}
+.m-g .check{width:32px; height:32px; top:-10px; right:-10px}
+.strip .t{width:64px; height:60px; display:flex; align-items:flex-end; justify-content:center; box-shadow:var(--out); overflow:hidden}
+
+/* ── 공통 픽셀 요소 ── */
+.px-art{display:block; flex:none}
+.px-art svg,.ic svg{display:block; width:100%; height:100%}
+.ic{display:inline-block; flex:none; vertical-align:middle}
+.out{box-shadow:var(--out)}
+.lift{filter:drop-shadow(6px 6px 0 var(--shadow))}
+.card{background:var(--card); box-shadow:var(--out)}
+
+.frame{position:relative; background:var(--paper); overflow:hidden}
+.frame.d{width:1280px; height:800px}
+.frame.m{width:375px; height:812px}
+.frame.lib{width:2640px; height:1100px}
+.dots{position:absolute; inset:0; pointer-events:none;
+  background-image:linear-gradient(90deg, var(--paper) 20px, transparent 20px), linear-gradient(var(--paper) 20px, var(--line-soft) 20px);
+  background-size:24px 24px}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; height:56px; padding:0 28px;
+  font:700 22px/1 var(--f); background:var(--pink); white-space:nowrap;
+  box-shadow:var(--out), inset -4px -4px 0 0 var(--pink-d), inset 4px 4px 0 0 rgba(255,255,255,.55)}
+.btn.ghost{background:var(--card); box-shadow:var(--out), inset -4px -4px 0 0 var(--line-soft)}
+.btn.yellow{background:var(--yellow); box-shadow:var(--out), inset -4px -4px 0 0 var(--yellow-d), inset 4px 4px 0 0 rgba(255,255,255,.55)}
+.btn.mint{background:var(--mint); box-shadow:var(--out), inset -4px -4px 0 0 var(--mint-d), inset 4px 4px 0 0 rgba(255,255,255,.55)}
+.btn.sm{height:40px; padding:0 16px; font:14px/1 var(--f14); gap:8px}
+.btn.block{width:100%}
+
+.chip{display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 14px; font:14px/1 var(--f14);
+  background:var(--card); box-shadow:var(--out)}
+.chip.pink{background:var(--pink-l)}
+.tag{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; font:11px/1 var(--f); background:var(--ink); color:var(--card)}
+.hearts{display:inline-flex; gap:4px; align-items:center}
+.label{font:700 14px/1 var(--f14); color:var(--ink-2); letter-spacing:.02em}
+.note{position:relative; background:var(--yellow-l); box-shadow:var(--out); padding:16px 20px; font:14px/1.7 var(--f14)}
+.note b{display:block; margin-bottom:4px}
+.newmark{position:absolute; top:-14px; left:16px}
+
+/* ── 상단 내비 ── */
+.nav{position:relative; z-index:2; height:72px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 48px; background:var(--card); box-shadow:0 4px 0 0 var(--ink)}
+.logo{display:flex; align-items:center; gap:10px; font:700 22px/1 var(--f)}
+.date{font:14px/1 var(--f14); color:var(--ink-2)}
+.steps{display:flex; align-items:center; gap:0; list-style:none; margin:0; padding:0; font:14px/1 var(--f14); color:var(--ink-3)}
+.steps li{display:flex; align-items:center; gap:8px}
+.steps li + li::before{content:''; width:40px; height:4px; margin:0 12px; background:var(--line-soft)}
+.steps li.done + li::before,.steps li.done + li.on::before{background:var(--ink)}
+.steps b{display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; background:var(--card); box-shadow:var(--out); color:var(--ink-3)}
+.steps .on,.steps .done{color:var(--ink)}
+.steps .on b{background:var(--pink); color:var(--ink)}
+.steps .done b{background:var(--ink); color:var(--card)}
+
+/* ── 00 컨셉 ── */
+.concept{display:grid; grid-template-columns:560px 1fr; gap:56px; padding:64px}
+.concept .big-logo{display:flex; align-items:center; gap:16px; font:700 44px/1 var(--f); margin:20px 0 16px}
+.concept h2{font:700 33px/1.4 var(--f)}
+.concept .lead{font:14px/1.9 var(--f14); color:var(--ink-2); margin:16px 0 28px}
+.flow{display:flex; flex-direction:column; gap:16px; margin-bottom:32px}
+.flow li{display:flex; gap:16px; align-items:center; list-style:none}
+.flow ol{margin:0; padding:0}
+.flow .num{width:48px; height:48px; display:flex; align-items:center; justify-content:center; font:700 22px/1 var(--f); flex:none}
+.flow h3{font:700 22px/1.2 var(--f); margin-bottom:6px}
+.flow p{font:14px/1.5 var(--f14); color:var(--ink-2)}
+.side-stack{display:flex; flex-direction:column; gap:28px}
+.panel{padding:20px 24px}
+.panel h3{font:700 14px/1 var(--f14); color:var(--ink-2); margin-bottom:16px}
+.palette{display:grid; grid-template-columns:repeat(7, 1fr); gap:12px}
+.palette .sw{display:flex; flex-direction:column; align-items:center; gap:8px; font:11px/1.3 var(--f); text-align:center}
+.palette .sw .box{width:64px; height:64px; display:flex; align-items:flex-end; justify-content:center; box-shadow:var(--out)}
+.palette .sw em{font-style:normal; color:var(--ink-3)}
+.specimen{display:flex; align-items:baseline; gap:24px; flex-wrap:wrap}
+.specimen span{display:block}
+.comps{display:flex; flex-wrap:wrap; gap:20px 24px; align-items:center}
+.rules{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; font:14px/1.6 var(--f14)}
+.rules div{background:var(--paper-2); padding:12px 14px}
+.rules b{display:block; font:700 22px/1.2 var(--f)}
+
+/* ── 01 랜딩 ── */
+.land-hero{position:absolute; left:80px; top:136px; width:540px}
+.eyebrow{display:inline-flex; align-items:center; gap:10px; height:36px; padding:0 14px; background:var(--card); box-shadow:var(--out); font:14px/1 var(--f14)}
+.land-hero h1{font:700 44px/1.45 var(--f); margin:28px 0 20px}
+.hl{background:linear-gradient(transparent 55%, var(--yellow) 55%, var(--yellow) 92%, transparent 92%)}
+.land-hero .lead{font:22px/1.6 var(--f); color:var(--ink-2); margin-bottom:36px}
+.cta-row{display:flex; gap:20px; align-items:center}
+.mini-steps{position:absolute; left:80px; top:588px; display:flex; gap:12px; align-items:center; font:14px/1 var(--f14)}
+.mini-steps .s{display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--card); box-shadow:var(--out)}
+.mini-steps .s b{display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; background:var(--ink); color:var(--card); font:11px/1 var(--f)}
+.showcase{position:absolute; left:676px; top:120px; display:grid; grid-template-columns:repeat(3, 168px); gap:24px 20px}
+.showcase .col2{transform:translateY(32px)}
+.polaroid{background:var(--card); box-shadow:var(--out); padding:12px 12px 10px; filter:drop-shadow(6px 6px 0 var(--shadow))}
+.polaroid .px-art{box-shadow:0 0 0 4px var(--ink)}
+.polaroid .cap{display:flex; align-items:center; justify-content:space-between; margin-top:12px; font:14px/1 var(--f14)}
+.ground{position:absolute; left:0; right:0; bottom:0; height:48px; background:linear-gradient(#6CC07A 0 8px, #8FD694 8px)}
+.ground::before{content:''; position:absolute; left:0; right:0; top:-8px; height:8px;
+  background:linear-gradient(90deg, transparent 0 40px, #6CC07A 40px 48px, transparent 48px 56px, #6CC07A 56px 64px, transparent 64px) 0 0/120px 8px}
+
+/* ── 02 기분 고르기 ── */
+.pick{position:absolute; left:80px; top:120px; width:704px}
+.pick h1{font:700 33px/1.3 var(--f)}
+.pick .sub{font:14px/1.7 var(--f14); color:var(--ink-2); margin:12px 0 28px}
+.mood-grid{display:grid; grid-template-columns:repeat(4, 160px); gap:20px 21px}
+.mood{position:relative; height:164px; background:var(--ms); box-shadow:var(--out);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:12px; padding-bottom:16px; font:700 22px/1 var(--f)}
+.mood.on{background:var(--mc); filter:drop-shadow(6px 6px 0 var(--ink)); transform:translate(-2px, -4px)}
+.mood .check{position:absolute; top:-10px; right:-10px; width:36px; height:36px; background:var(--ink); display:flex; align-items:center; justify-content:center}
+.mood.free{background:var(--card); box-shadow:none; outline:4px dashed var(--ink-3); outline-offset:-4px; color:var(--ink-2)}
+.mood.free .plus{width:96px; height:96px; display:flex; align-items:center; justify-content:center}
+.amount{display:flex; align-items:center; gap:20px; margin-top:36px}
+.amount .scale{display:flex; gap:8px; align-items:center; font:11px/1 var(--f); color:var(--ink-3)}
+.memo{margin-top:24px}
+.memo .field{display:flex; align-items:center; justify-content:space-between; height:56px; margin-top:12px; padding:0 20px; background:var(--card); box-shadow:var(--out); font:22px/1 var(--f)}
+.memo .field span:last-child{font:14px/1 var(--f14); color:var(--ink-3)}
+.preview{position:absolute; left:848px; top:120px; width:368px; padding:16px 16px 20px}
+.preview .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px}
+.preview .px-art{box-shadow:0 0 0 4px var(--ink)}
+.preview .why{font:14px/1.7 var(--f14); color:var(--ink-2); margin:20px 0}
+.back-btn{position:absolute; left:80px; bottom:48px}
+
+/* ── 03 꾸미기 ── */
+.stage-col{position:absolute; left:64px; top:104px; width:560px}
+.stage-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px}
+.mood-pill{display:inline-flex; align-items:center; gap:10px; height:40px; padding:0 14px; background:var(--pink-l); box-shadow:var(--out); font:14px/1 var(--f14)}
+.mood-pill b{font:700 14px/1 var(--f14)}
+.linkish{font:14px/1 var(--f14); color:var(--ink-2); text-decoration:underline; text-underline-offset:4px}
+.stage-box{width:560px; height:560px; padding:16px; background:var(--card); box-shadow:var(--out)}
+.stage-box .px-art{box-shadow:0 0 0 4px var(--ink)}
+.tools{display:flex; gap:16px; margin-top:24px}
+.tools .btn{flex:1}
+.edit-panel{position:absolute; left:672px; top:104px; width:544px; height:600px; padding:0 0 20px; display:flex; flex-direction:column}
+.tabs{display:grid; grid-template-columns:repeat(6, 1fr); background:var(--paper-2); box-shadow:0 4px 0 0 var(--ink)}
+.tab{height:72px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; font:14px/1 var(--f14); color:var(--ink-2)}
+.tab + .tab{box-shadow:-4px 0 0 0 var(--line-soft)}
+.tab.on{background:var(--card); color:var(--ink); font-weight:700; box-shadow:inset 0 -4px 0 0 var(--pink)}
+.panel-body{padding:24px 20px 0; flex:1; display:flex; flex-direction:column}
+.panel-title{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px}
+.panel-title h3{font:700 22px/1 var(--f)}
+.toggle{display:inline-flex; align-items:center; gap:8px; font:14px/1 var(--f14)}
+.toggle .sw{width:44px; height:24px; background:var(--line-soft); box-shadow:var(--out); position:relative}
+.toggle .sw::after{content:''; position:absolute; top:4px; left:4px; width:16px; height:16px; background:var(--ink)}
+.toggle.on .sw{background:var(--pink)}
+.toggle.on .sw::after{left:24px}
+.items{display:grid; grid-template-columns:repeat(4, 116px); gap:16px 12px}
+.item{position:relative; display:flex; flex-direction:column; align-items:center; gap:8px; font:14px/1 var(--f14)}
+.item .thumb{width:116px; height:116px; display:flex; align-items:center; justify-content:center; background:var(--paper); box-shadow:var(--out)}
+.item.on .thumb{background:var(--pink-l); box-shadow:var(--out), inset 0 0 0 4px var(--pink)}
+.item.on{font-weight:700}
+.item .rec{position:absolute; top:-8px; left:-8px; z-index:1}
+.item.soon .thumb{background:var(--paper); box-shadow:none; outline:4px dashed var(--line-soft); outline-offset:-4px; color:var(--ink-3); font:11px/1.5 var(--f); text-align:center}
+.item.soon{color:var(--ink-3)}
+.colors{display:flex; gap:40px; margin-top:auto}
+.colors .row{display:flex; gap:10px; margin-top:12px}
+.swatch{width:32px; height:32px; box-shadow:var(--out)}
+.swatch.on{outline:4px solid var(--pink); outline-offset:4px}
+.colors .hint{font:14px/1.6 var(--f14); color:var(--ink-3)}
+.edit-foot{position:absolute; left:672px; right:64px; top:724px; display:flex; justify-content:flex-end; gap:20px}
+
+/* ── 04 공유 ── */
+.share-card{position:absolute; left:120px; top:104px; width:360px; height:640px; background:var(--pink-l); box-shadow:var(--out);
+  padding:24px 36px; display:flex; flex-direction:column; align-items:center; filter:drop-shadow(8px 8px 0 var(--shadow))}
+.share-card .top{width:100%; display:flex; justify-content:space-between; font:11px/1 var(--f); margin-bottom:16px}
+.share-card .px-art{box-shadow:0 0 0 4px var(--ink)}
+.share-card .mood-name{font:700 33px/1 var(--f); margin:28px 0 12px}
+.bubble{position:relative; margin-top:24px; padding:12px 16px; background:var(--card); box-shadow:var(--out); font:14px/1.5 var(--f14)}
+.bubble::before{content:''; position:absolute; top:-12px; left:50%; margin-left:-6px; width:12px; height:8px; background:var(--ink);
+  clip-path:polygon(50% 0, 100% 100%, 0 100%)}
+.share-card .foot{margin-top:auto; width:100%; display:flex; justify-content:space-between; align-items:center; font:700 14px/1 var(--f14)}
+.share-side{position:absolute; left:560px; top:120px; width:640px}
+.confetti{display:flex; gap:14px; margin-bottom:20px}
+.share-side h1{font:700 33px/1.35 var(--f)}
+.share-side .sub{font:14px/1.7 var(--f14); color:var(--ink-2); margin:12px 0 28px}
+.seg{display:inline-flex; box-shadow:var(--out); background:var(--card)}
+.seg span{height:40px; padding:0 18px; display:flex; align-items:center; font:14px/1 var(--f14); color:var(--ink-2)}
+.seg span.on{background:var(--ink); color:var(--card)}
+.share-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:24px 0 32px}
+.share-grid .btn{height:60px; justify-content:flex-start; padding:0 20px; font:700 22px/1 var(--f)}
+.og-wrap{display:flex; gap:32px; align-items:stretch}
+.og{width:360px; flex:none; background:var(--card); box-shadow:var(--out)}
+.og .img{height:144px; background:var(--pink-l); display:flex; align-items:center; justify-content:center; gap:16px; box-shadow:0 4px 0 0 var(--ink)}
+.og .txt{padding:14px 14px 12px; font:14px/1.5 var(--f14)}
+.og .txt b{display:block; margin-bottom:4px}
+.og .txt span{color:var(--ink-3); font:11px/1 var(--f)}
+.og-side{display:flex; flex-direction:column; justify-content:space-between}
+.share-foot{display:flex; flex-direction:column; gap:16px; align-items:flex-start}
+
+/* ── 모바일 ── */
+.status{height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; font:700 14px/1 var(--f14)}
+.batt{width:26px; height:14px; box-shadow:var(--out); position:relative; margin-right:4px}
+.batt::after{content:''; position:absolute; inset:3px 6px 3px 3px; background:var(--ink)}
+.m-head{height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 20px}
+.m-head .count{font:14px/1 var(--f14); color:var(--ink-2)}
+.m-bar{height:8px; margin:0 20px; background:var(--line-soft); position:relative}
+.m-bar i{position:absolute; left:0; top:0; bottom:0; background:var(--pink); box-shadow:inset 0 -4px 0 0 var(--pink-d)}
+.m-body{padding:24px 20px 0}
+.m-body h1{font:700 22px/1.4 var(--f)}
+.m-body .sub{font:14px/1.6 var(--f14); color:var(--ink-2); margin:6px 0 20px}
+.m-moods{display:grid; grid-template-columns:1fr 1fr; gap:16px 16px}
+.m-mood{height:104px; background:var(--ms); box-shadow:var(--out); display:flex; align-items:center; gap:8px; padding:0 10px; font:700 14px/1.2 var(--f14); position:relative}
+.m-mood.on{background:var(--mc); filter:drop-shadow(4px 4px 0 var(--ink))}
+.m-mood .check{position:absolute; top:-8px; right:-8px; width:28px; height:28px; background:var(--ink); display:flex; align-items:center; justify-content:center}
+.m-mood.free{background:var(--card); box-shadow:none; outline:4px dashed var(--ink-3); outline-offset:-4px; color:var(--ink-2); justify-content:center}
+.m-cta{position:absolute; left:0; right:0; bottom:0; padding:16px 20px 34px; background:var(--card); box-shadow:0 -4px 0 0 var(--ink)}
+.m-stage{position:absolute; left:20px; top:108px; width:288px; height:288px; box-shadow:0 0 0 4px var(--ink)}
+.m-stage .mood-pill{position:absolute; left:12px; top:12px; height:32px; font-size:11px}
+.m-tools{position:absolute; right:-8px; top:12px; display:flex; flex-direction:column; gap:8px; transform:translateX(100%)}
+.m-tools span{width:40px; height:40px; background:var(--card); box-shadow:var(--out); display:flex; align-items:center; justify-content:center}
+.sheet{position:absolute; left:0; right:0; top:420px; bottom:0; background:var(--card); box-shadow:0 -4px 0 0 var(--ink)}
+.sheet .grip{width:48px; height:6px; background:var(--line-soft); margin:10px auto 8px}
+.m-tabs{display:grid; grid-template-columns:repeat(6, 1fr); padding:0 12px; box-shadow:0 4px 0 0 var(--line-soft)}
+.m-tabs span{height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; font:11px/1 var(--f); color:var(--ink-3)}
+.m-tabs span.on{color:var(--ink); font-weight:700; box-shadow:inset 0 -4px 0 0 var(--pink)}
+.m-items{display:grid; grid-template-columns:repeat(4, 76px); gap:12px 8px; padding:16px 20px 0}
+.m-items .thumb{width:76px; height:76px; background:var(--paper); box-shadow:var(--out); display:flex; align-items:center; justify-content:center; position:relative}
+.m-items .on .thumb{background:var(--pink-l); box-shadow:var(--out), inset 0 0 0 4px var(--pink)}
+.m-items .rec{position:absolute; top:-8px; left:-8px}
+.m-items p{font:11px/1 var(--f); text-align:center; margin-top:8px}
+.m-colors{display:flex; gap:12px; padding:20px 20px 0; align-items:center; font:11px/1 var(--f); color:var(--ink-2)}
+.m-colors .swatch{width:28px; height:28px}
+.m-share-card{position:absolute; left:56px; top:112px; width:264px; height:470px; background:var(--pink-l); box-shadow:var(--out);
+  padding:16px 36px; display:flex; flex-direction:column; align-items:center; filter:drop-shadow(6px 6px 0 var(--shadow))}
+.m-share-card .top{width:100%; display:flex; justify-content:space-between; font:11px/1 var(--f); margin-bottom:12px}
+.m-share-card .px-art{box-shadow:0 0 0 4px var(--ink)}
+.m-share-card .mood-name{font:700 22px/1 var(--f); margin:20px 0 8px}
+.m-share-card .bubble{margin-top:16px; font-size:11px; font-family:var(--f); padding:8px 10px}
+.m-share-card .foot{margin-top:auto; font:700 11px/1 var(--f); width:100%; display:flex; justify-content:space-between}
+.m-share{position:absolute; left:20px; right:20px; top:612px; display:flex; justify-content:space-between}
+.m-share div{display:flex; flex-direction:column; align-items:center; gap:8px; font:11px/1 var(--f); width:72px}
+.m-share .b{width:52px; height:52px; display:flex; align-items:center; justify-content:center; box-shadow:var(--out)}
+.m-save{position:absolute; left:20px; right:20px; top:716px}
+
+/* ── 파츠 라이브러리 ── */
+.lib-head{display:flex; justify-content:space-between; align-items:flex-end; padding:48px 48px 32px}
+.lib-head h2{font:700 33px/1.3 var(--f)}
+.lib-head p{font:14px/1.7 var(--f14); color:var(--ink-2)}
+.lib-cols{display:grid; grid-template-columns:1fr 1fr; gap:24px 48px; padding:0 48px}
+.lib-row{display:flex; gap:20px; padding:20px 24px; background:var(--card); box-shadow:var(--out); min-height:200px}
+.lib-row .cat{width:120px; flex:none}
+.lib-row .cat h3{font:700 22px/1.2 var(--f); margin:8px 0 6px}
+.lib-row .cat p{font:11px/1.5 var(--f); color:var(--ink-3)}
+.lib-items{display:flex; gap:14px; flex-wrap:wrap}
+.lib-item{width:124px; display:flex; flex-direction:column; align-items:center; gap:8px; font:14px/1 var(--f14)}
+.lib-item .thumb{width:124px; height:124px; background:var(--paper); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 0 2px var(--line-soft)}
+.lib-item .moods{display:flex; gap:4px; height:10px}
+.lib-item .moods i{width:10px; height:10px; box-shadow:0 0 0 2px var(--ink)}
+.lib-bottom{display:grid; grid-template-columns:1fr 760px; gap:48px; padding:32px 48px 0}
+.layers{display:flex; gap:12px}
+.layers .ly{display:flex; flex-direction:column; align-items:center; gap:10px; font:14px/1 var(--f14)}
+.layers .ly .px-art{box-shadow:0 0 0 4px var(--ink)}
+.layers .ly span{color:var(--ink-2)}
+.slots{display:flex; flex-direction:column; gap:16px; font:14px/1 var(--f14)}
+.slots .grp{display:flex; align-items:center; gap:12px}
+.slots .grp > span{width:150px; color:var(--ink-2)}
+.slots .grp .swatch{width:28px; height:28px}
+</style>
+</head>
+<body>
+<main class="board">
+
+  <header class="board-head">
+    <div>
+      <h1>your mind · 오늘의 기분 픽셀 캐릭터</h1>
+      <p>기분 고르기 → 캐릭터 꾸미기 → 카드로 공유 · 시안 v0.1 · 2026.11.13</p>
+    </div>
+    <p>모든 화면·문구·컴포넌트는 신규 시안이며 아직 코드에 없습니다. 「03 꾸미기」는 A안·B안 모두 직접 눌러볼 수 있어요.<br>
+    세 번째 열은 <b>B안 (SD 아바타 비율)</b>, 첫 줄 맨 오른쪽은 <b>C안 (디테일 SD)</b> — UI는 그대로, 캐릭터만 바꾼 비교안이에요.<br>
+    둘째 줄 「캐릭터 시작하기」는 처음 방문할 때 한 번만 나오는 성별 선택 화면이에요 (신규).</p>
+  </header>
+
+  <!-- ═════════ 00 컨셉 ═════════ -->
+  <section class="frame d" data-doan-frame="concept" data-doan-title="00 컨셉 & 스타일">
+    <div class="concept">
+      <div>
+        <span class="tag">시안 v0.1 · 서비스명 가칭</span>
+        <div class="big-logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="5"></i>your mind</div>
+        <h2>오늘 당신의 기분을<br>표현해주세요</h2>
+        <p class="lead">오늘의 기분을 고르고, 기분을 닮은 픽셀 캐릭터를 꾸며서,<br>카드 한 장으로 친구에게 공유하는 서비스예요.</p>
+        <ol class="flow" data-doan-id="flow">
+          <li><span class="num card" style="background:var(--yellow)">1</span><div><h3>기분 고르기</h3><p>7가지 기분 + 직접 쓰기 · 얼마나? · 한 줄 메모</p></div></li>
+          <li><span class="num card" style="background:var(--pink)">2</span><div><h3>캐릭터 꾸미기</h3><p>헤어 · 표정 · 옷 · 신발 · 악세서리 · 배경, 기분별 추천 뱃지</p></div></li>
+          <li><span class="num card" style="background:var(--mint)">3</span><div><h3>카드로 공유하기</h3><p>스토리/정사각형 카드 저장 · 링크 공유 미리보기</p></div></li>
+        </ol>
+        <div class="note" data-doan-id="concept-note"><b>시안 메모</b>서비스명·문구·화면은 모두 이번에 새로 그린 시안이에요. 공유 채널(인스타그램·카카오톡)과 '직접 쓰기' 기분은 확정이 필요한 제안입니다.</div>
+      </div>
+      <div class="side-stack">
+        <div class="panel card" data-doan-id="mood-palette">
+          <h3>기분 팔레트 · 기분마다 색 · 표정 · 기본 배경이 정해져요</h3>
+          <div class="palette">
+            <div class="sw"><span class="box" style="background:#FFD23F"><span class="px-art" data-px data-mood="happy" data-bg="none" data-crop="charHead" data-scale="2"></span></span>행복해요<em>#FFD23F</em></div>
+            <div class="sw"><span class="box" style="background:#FF7EB6"><span class="px-art" data-px data-mood="excited" data-bg="none" data-crop="charHead" data-scale="2"></span></span>설레요<em>#FF7EB6</em></div>
+            <div class="sw"><span class="box" style="background:#7ED9C3"><span class="px-art" data-px data-mood="calm" data-bg="none" data-crop="charHead" data-scale="2"></span></span>평온해요<em>#7ED9C3</em></div>
+            <div class="sw"><span class="box" style="background:#B8A7E8"><span class="px-art" data-px data-mood="tired" data-bg="none" data-crop="charHead" data-scale="2"></span></span>피곤해요<em>#B8A7E8</em></div>
+            <div class="sw"><span class="box" style="background:#7AA7FF"><span class="px-art" data-px data-mood="sad" data-bg="none" data-crop="charHead" data-scale="2"></span></span>우울해요<em>#7AA7FF</em></div>
+            <div class="sw"><span class="box" style="background:#FF6B57"><span class="px-art" data-px data-mood="angry" data-bg="none" data-crop="charHead" data-scale="2"></span></span>화나요<em>#FF6B57</em></div>
+            <div class="sw"><span class="box" style="background:#C9CDD6"><span class="px-art" data-px data-mood="blank" data-bg="none" data-crop="charHead" data-scale="2"></span></span>멍해요<em>#C9CDD6</em></div>
+          </div>
+        </div>
+        <div class="panel card" data-doan-id="type">
+          <h3>타이포 · Galmuri 픽셀 폰트, 11의 배수 크기 (11 · 22 · 33 · 44) + Galmuri14 본문</h3>
+          <div class="specimen">
+            <span style="font:700 44px/1 var(--f)">기분 Aa</span>
+            <span style="font:700 33px/1 var(--f)">오늘의 나</span>
+            <span style="font:22px/1 var(--f)">꾸미러 가기</span>
+            <span style="font:14px/1.6 var(--f14); color:var(--ink-2)">본문 14 · 고른 기분에 맞춰<br>표정과 배경을 골라둘게요</span>
+          </div>
+        </div>
+        <div class="panel card" data-doan-id="components">
+          <h3>컴포넌트 · 4px 계단 모서리 외곽선 + 안쪽 그늘</h3>
+          <div class="comps">
+            <span class="btn">꾸미러 가기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+            <span class="btn ghost">이전</span>
+            <span class="mood-pill"><b>설레요</b><span class="hearts" data-hearts="3" data-c="#FF7EB6"></span></span>
+            <span class="chip"><i class="ic" data-icon="dice" data-scale="2"></i>랜덤</span>
+            <span class="tag"><i class="ic" data-icon="sparkle" data-c="#FFD23F" data-ink="#FFFFFF" data-scale="1"></i>추천</span>
+            <span class="swatch" style="background:#8B5A3C"></span><span class="swatch on" style="background:#FF8FB8"></span>
+          </div>
+        </div>
+        <div class="rules" data-doan-id="pixel-rules">
+          <div><b>32×34</b>캐릭터 그리드</div>
+          <div><b>48×48</b>배경 포함 스테이지</div>
+          <div><b>정수 배율</b>×2 · ×4 · ×7 · ×11 로만 확대</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 01 랜딩 ═════════ -->
+  <section class="frame d" data-doan-frame="landing" data-doan-title="01 랜딩">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</div>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <div class="land-hero">
+      <span class="eyebrow"><i class="ic" data-icon="sparkle" data-c="#FFD23F" data-scale="3"></i>11월 13일 금요일, 오늘 기분은 어때요?</span>
+      <h1>오늘 당신의 기분을<br><span class="hl">표현</span>해주세요</h1>
+      <p class="lead">기분을 닮은 픽셀 캐릭터를 꾸미고<br>카드 한 장으로 공유해보세요.</p>
+      <div class="cta-row">
+        <span class="btn" data-doan-id="landing-cta">오늘의 나 만들기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+        <span class="btn ghost">예시 둘러보기</span>
+      </div>
+    </div>
+    <div class="mini-steps" data-doan-id="landing-steps">
+      <span class="s"><b>1</b>기분 고르기</span><i class="ic" data-icon="arrow" data-ink="#958BA8" data-scale="2"></i>
+      <span class="s"><b>2</b>캐릭터 꾸미기</span><i class="ic" data-icon="arrow" data-ink="#958BA8" data-scale="2"></i>
+      <span class="s"><b>3</b>카드로 공유</span>
+    </div>
+    <div class="showcase" data-doan-id="landing-showcase">
+      <div class="polaroid"><span class="px-art" data-px data-mood="happy" data-hair="bob" data-outfit="stripe" data-outfit-color="yellow" data-acc="sprout" data-scale="3"></span><div class="cap">행복해요<span class="hearts" data-hearts="4" data-c="#FFD23F" data-max="4"></span></div></div>
+      <div class="polaroid col2"><span class="px-art" data-px data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-scale="3"></span><div class="cap">설레요<span class="hearts" data-hearts="3" data-c="#FF7EB6" data-max="4"></span></div></div>
+      <div class="polaroid"><span class="px-art" data-px data-mood="tired" data-hair="bun" data-hair-color="black" data-outfit="pajama" data-outfit-color="lavender" data-shoes="slipper" data-acc="beanie" data-scale="3"></span><div class="cap">피곤해요<span class="hearts" data-hearts="4" data-c="#B8A7E8" data-max="4"></span></div></div>
+      <div class="polaroid"><span class="px-art" data-px data-mood="sad" data-hair="long" data-hair-color="purple" data-skin="peach" data-outfit="hoodie" data-outfit-color="sky" data-shoes="boots" data-acc="phones" data-scale="3"></span><div class="cap">우울해요<span class="hearts" data-hearts="2" data-c="#7AA7FF" data-max="4"></span></div></div>
+      <div class="polaroid col2"><span class="px-art" data-px data-mood="calm" data-hair="long" data-hair-color="blonde" data-skin="tan" data-outfit="overall" data-outfit-color="mint" data-acc="glasses" data-scale="3"></span><div class="cap">평온해요<span class="hearts" data-hearts="3" data-c="#7ED9C3" data-max="4"></span></div></div>
+      <div class="polaroid"><span class="px-art" data-px data-mood="angry" data-hair="short" data-hair-color="black" data-skin="deep" data-outfit="hoodie" data-outfit-color="charcoal" data-scale="3"></span><div class="cap">화나요<span class="hearts" data-hearts="4" data-c="#FF6B57" data-max="4"></span></div></div>
+    </div>
+    <div class="ground"></div>
+  </section>
+
+  <!-- ═════════ B안 · 비율 비교 ═════════ -->
+  <section class="frame d" data-doan-frame="b-compare" data-doan-title="B안 · SD 아바타 비율 비교">
+    <div class="dots"></div>
+    <div class="cmp" style="position:relative">
+      <div class="cmp-head">
+        <div>
+          <span class="b-mark">B안 제안 · 아직 코드 없음</span>
+          <h2>B안 · 머리가 큰 SD 아바타 비율</h2>
+          <p>화면·색·폰트는 A안 그대로 두고, 캐릭터 비율과 얼굴 배치만 바꿨어요.</p>
+        </div>
+        <p style="text-align:right">특정 게임 그림체를 따라 그리지 않은 오리지널 비율이에요.<br>시점은 A안과 같은 정면이에요 (쿼터뷰는 적용 안 함).</p>
+      </div>
+      <div class="cmp-body">
+        <div class="pair" data-doan-id="b-pair">
+          <div class="who">
+            <h3>A안 · 지금<span class="tag">32×34</span></h3>
+            <div class="fig">
+              <div class="ratio"><i class="h" style="height:112px">52%</i><i class="t" style="height:63px">29%</i><i class="l" style="height:42px">19%</i></div>
+              <span class="px-art" style="margin-bottom:-7px" data-px data-style="a" data-mood="calm" data-bg="none" data-crop="char" data-scale="7"></span>
+            </div>
+            <ul class="facts"><li>머리+헤어 16 · 몸 9 · 다리 6 (px)</li><li>목 1px · 눈은 얼굴 가운데, 점 눈</li></ul>
+          </div>
+          <div class="who b">
+            <h3>B안 · SD 아바타<span class="tag">32×36</span></h3>
+            <div class="fig">
+              <div class="ratio"><i class="h" style="height:147px">62%</i><i class="t" style="height:42px">18%</i><i class="l" style="height:49px">21%</i></div>
+              <span class="px-art" data-px data-style="b" data-mood="calm" data-bg="none" data-crop="char" data-scale="7"></span>
+            </div>
+            <ul class="facts"><li>머리+헤어 21 · 몸 6 · 다리 7 (px)</li><li>목 없음 · 큰 눈이 얼굴 아래쪽</li></ul>
+          </div>
+        </div>
+        <div>
+          <ol class="diff" data-doan-id="b-diff">
+            <li><b>1</b><span><em>머리 52% → 62%</em> 작은 썸네일에서도 표정이 읽혀요</span></li>
+            <li><b>2</b><span><em>목 없음</em> 턱 바로 아래에서 옷이 시작해요</span></li>
+            <li><b>3</b><span><em>큰 눈 + 하이라이트</em> 얼굴 아래쪽에 넓게, 입은 2px</span></li>
+            <li><b>4</b><span><em>헤어 볼륨 +3~4px</em> 헤어 실루엣이 곧 개성이에요</span></li>
+            <li><b>5</b><span><em>몸통 9 → 6px</em> 옷 무늬를 그릴 칸은 줄어요</span></li>
+          </ol>
+          <span class="label">B안 기분 7종</span>
+          <div class="strip" data-doan-id="b-moods">
+            <span class="t" style="background:#FFD23F"><span class="px-art" data-px data-style="b" data-mood="happy" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:#FF7EB6"><span class="px-art" data-px data-style="b" data-mood="excited" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:#7ED9C3"><span class="px-art" data-px data-style="b" data-mood="calm" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:#B8A7E8"><span class="px-art" data-px data-style="b" data-mood="tired" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:#7AA7FF"><span class="px-art" data-px data-style="b" data-mood="sad" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:#FF6B57"><span class="px-art" data-px data-style="b" data-mood="angry" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:#C9CDD6"><span class="px-art" data-px data-style="b" data-mood="blank" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+          </div>
+          <span class="label">B안 헤어 5종</span>
+          <div class="strip" data-doan-id="b-hairs">
+            <span class="t" style="background:var(--paper-2)"><span class="px-art" data-px data-style="b" data-mood="calm" data-hair="bob" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:var(--paper-2)"><span class="px-art" data-px data-style="b" data-mood="calm" data-hair="long" data-hair-color="blonde" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:var(--paper-2)"><span class="px-art" data-px data-style="b" data-mood="calm" data-hair="bun" data-hair-color="black" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:var(--paper-2)"><span class="px-art" data-px data-style="b" data-mood="calm" data-hair="short" data-hair-color="mint" data-skin="tan" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+            <span class="t" style="background:var(--paper-2)"><span class="px-art" data-px data-style="b" data-mood="calm" data-hair="twin" data-hair-color="pink" data-bg="none" data-crop="charHead" data-scale="2"></span></span>
+          </div>
+          <div class="note" data-doan-id="b-tradeoff"><b>고려할 점</b>B안은 헤어·표정 비중이 커서 헤어를 더 많이 그려야 매력이 살아요. 대신 옷 파츠는 단순해도 괜찮아요. 화면의 hover·disabled 상태는 A안과 같아서 따로 그리지 않았어요.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ C안 · 디테일 SD 캐릭터 시트 ═════════ -->
+  <section class="frame d" style="height:1080px" data-doan-frame="c-sheet" data-doan-title="C안 · 디테일 SD 캐릭터 시트">
+    <div class="dots"></div>
+    <div class="csheet" style="position:relative">
+      <div class="csheet-head">
+        <div>
+          <span class="c-mark">C안 제안 · 아직 코드 없음</span>
+          <h2>C안 · 디테일 SD (해상도 2배)</h2>
+          <p>B안 비율은 그대로 두고 해상도를 2배로 올려서, 헤어 가닥·눈동자·옷 그늘까지 그렸어요.<br>남·여 기본 캐릭터는 보내주신 두 예시의 분위기를 참고했어요.</p>
+        </div>
+        <p style="text-align:right">B안 32×36 → <b>C안 48×64</b><br>특정 게임 그림체를 따라 그리지 않았고, 브랜드 로고는 넣지 않았어요.</p>
+      </div>
+      <div class="c-notes" data-doan-id="c-diff">
+        <div><b>1</b><span><em>해상도 2배</em> 헤어 가닥, 귀, 눈동자 하이라이트와 속눈썹</span></div>
+        <div><b>2</b><span><em>옷 디테일</em> 카라, 소매 라인, 주머니, 주름 그늘</span></div>
+        <div><b>3</b><span><em>성별</em> 얼굴(속눈썹)과 시작 코디만 달라요. 파츠는 같이 써요</span></div>
+        <div><b>4</b><span><em>제작 방식</em> 시안은 도형 + 자동 외곽선, 실제 서비스는 PNG 파츠 권장</span></div>
+      </div>
+      <div class="cs-top">
+        <div class="figs" data-doan-id="c-figs">
+          <div class="fig-card ref" style="width:320px">
+            <div class="floor"><span class="px-art" data-px data-style="b" data-mood="calm" data-hair="bob" data-outfit="hoodie" data-outfit-color="sky" data-bg="none" data-crop="char" data-scale="9"></span></div>
+            <h3>B안 <span class="tag">같은 키로 비교</span></h3>
+            <p>32×36 · 픽셀이 굵고 단순해요</p>
+          </div>
+          <div class="fig-card">
+            <div class="floor"><span class="px-art" data-pxc data-c-gender="m" data-scale="5"></span></div>
+            <h3>C안 · 남</h3>
+            <p>삐죽 숏컷 · 트랙 재킷<br>카고 바지 · 스니커즈</p>
+          </div>
+          <div class="fig-card">
+            <div class="floor"><span class="px-art" data-pxc data-c-gender="f" data-scale="5"></span></div>
+            <h3>C안 · 여</h3>
+            <p>하이 포니테일 · 큰 리본 · 초커<br>오프숄더 · 레이어드 스커트 · 부츠</p>
+          </div>
+        </div>
+        <div>
+          <span class="label">헤어 5종</span>
+          <div class="heads grid2" data-doan-id="c-hairs">
+            <span class="t"><span class="px-art" data-pxc data-c-gender="m" data-c-hair="spiky" data-c-crop="head" data-scale="2"></span></span>
+            <span class="t"><span class="px-art" data-pxc data-c-gender="m" data-c-hair="dandy" data-c-hair-color="black" data-c-crop="head" data-scale="2"></span></span>
+            <span class="t"><span class="px-art" data-pxc data-c-gender="f" data-c-crop="head" data-scale="2"></span></span>
+            <span class="t"><span class="px-art" data-pxc data-c-gender="f" data-c-hair="long" data-c-hair-color="blonde" data-c-acc="" data-c-crop="head" data-scale="2"></span></span>
+            <span class="t"><span class="px-art" data-pxc data-c-gender="f" data-c-hair="bob" data-c-hair-color="pink" data-c-acc="" data-c-crop="head" data-scale="2"></span></span>
+          </div>
+        </div>
+      </div>
+      <div class="cs-bottom">
+        <div>
+          <span class="label">기분 7종 · 여</span>
+          <div class="heads" data-doan-id="c-moods-f"><span class="t" style="background:#FFD23F"><span class="px-art" data-pxc data-c-gender="f" data-c-face="happy" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#FF7EB6"><span class="px-art" data-pxc data-c-gender="f" data-c-face="excited" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#7ED9C3"><span class="px-art" data-pxc data-c-gender="f" data-c-face="calm" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#B8A7E8"><span class="px-art" data-pxc data-c-gender="f" data-c-face="tired" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#7AA7FF"><span class="px-art" data-pxc data-c-gender="f" data-c-face="sad" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#FF6B57"><span class="px-art" data-pxc data-c-gender="f" data-c-face="angry" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#C9CDD6"><span class="px-art" data-pxc data-c-gender="f" data-c-face="blank" data-c-crop="head" data-scale="2"></span></span></div>
+          <span class="label">기분 7종 · 남</span>
+          <div class="heads" data-doan-id="c-moods-m"><span class="t" style="background:#FFD23F"><span class="px-art" data-pxc data-c-gender="m" data-c-face="happy" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#FF7EB6"><span class="px-art" data-pxc data-c-gender="m" data-c-face="excited" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#7ED9C3"><span class="px-art" data-pxc data-c-gender="m" data-c-face="calm" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#B8A7E8"><span class="px-art" data-pxc data-c-gender="m" data-c-face="tired" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#7AA7FF"><span class="px-art" data-pxc data-c-gender="m" data-c-face="sad" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#FF6B57"><span class="px-art" data-pxc data-c-gender="m" data-c-face="angry" data-c-crop="head" data-scale="2"></span></span><span class="t" style="background:#C9CDD6"><span class="px-art" data-pxc data-c-gender="m" data-c-face="blank" data-c-crop="head" data-scale="2"></span></span></div>
+        </div>
+        <div>
+          <span class="label">성별 상관없이 섞어 입기</span>
+          <div class="combos" data-doan-id="c-combos">
+            <span class="t"><span class="px-art" data-pxc data-c-gender="m" data-c-hair="dandy" data-c-hair-color="black" data-c-top="hoodie" data-scale="2"></span></span>
+            <span class="t"><span class="px-art" data-pxc data-c-gender="f" data-c-hair="bob" data-c-hair-color="pink" data-c-acc="" data-c-top="track" data-c-bottom="cargo" data-c-shoes="sneakers" data-scale="2"></span></span>
+            <span class="t"><span class="px-art" data-pxc data-c-gender="m" data-c-hair="dandy" data-c-hair-color="blonde" data-c-top="knit" data-c-acc="choker" data-c-shoes="loafers" data-scale="2"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 00 캐릭터 시작하기 (신규 · 첫 방문) ═════════ -->
+  <section class="frame d" data-doan-frame="char-start" data-doan-title="00 캐릭터 시작하기 (첫 방문 · 성별 선택)">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind <span class="new-mark">신규 화면 · 코드 없음</span></div>
+      <span class="label">처음 한 번만</span>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <div class="start-title">
+      <h1>어떤 캐릭터로 시작할까요?</h1>
+      <p>처음 한 번만 골라요. 고른 캐릭터는 기억해두고, 꾸미기에서 언제든 바꿀 수 있어요.</p>
+      <p style="font:11px/1.6 var(--f); color:var(--ink-3)">시안 메모 · 캐릭터는 C안 기준이에요. A·B안에는 아직 성별 기본 캐릭터가 없어요.</p>
+    </div>
+    <div class="g-cards" data-doan-id="gender-cards">
+      <button class="g-card" data-doan-id="gender-m">
+        <span class="stage"><span class="px-art" data-pxc data-c-gender="m" data-scale="5" data-label="남자 기본 캐릭터"></span></span>
+        <span class="name">남자</span>
+      </button>
+      <button class="g-card on" data-doan-id="gender-f">
+        <span class="check"><i class="ic" data-icon="check" data-ink="#FFFFFF" data-scale="3"></i></span>
+        <span class="stage"><span class="px-art" data-pxc data-c-gender="f" data-scale="5" data-label="여자 기본 캐릭터"></span></span>
+        <span class="name">여자</span>
+      </button>
+    </div>
+    <div class="start-foot">
+      <div class="left">
+        <span class="policy" data-doan-id="gender-policy"><i class="ic" data-icon="sparkle" data-c="#FFD23F" data-scale="3"></i>헤어·옷·악세서리는 성별과 상관없이 모두 고를 수 있어요</span>
+        <span class="skip" data-doan-id="gender-skip"><span class="linkish">선택하지 않고 시작할래요</span><span class="tag">넣을지 결정 필요</span></span>
+      </div>
+      <span class="btn" data-doan-id="gender-next">이 캐릭터로 시작 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+    </div>
+  </section>
+
+  <section class="frame m" data-doan-frame="m-char-start" data-doan-title="M0 모바일 · 캐릭터 시작하기">
+    <div class="status"><span>9:41</span><span class="batt"></span></div>
+    <div class="m-head"><span style="width:24px"></span><span class="count">처음 한 번만</span><span style="width:24px"></span></div>
+    <div class="m-body">
+      <h1>어떤 캐릭터로<br>시작할까요?</h1>
+      <p class="sub">처음 한 번만 골라요. 꾸미기에서 언제든 바꿀 수 있어요.</p>
+      <div class="m-g" data-doan-id="m-gender-cards">
+        <div class="g"><span class="stage"><span class="px-art" data-pxc data-c-gender="m" data-scale="3"></span></span><b>남자</b></div>
+        <div class="g on"><span class="check"><i class="ic" data-icon="check" data-ink="#FFFFFF" data-scale="2"></i></span><span class="stage"><span class="px-art" data-pxc data-c-gender="f" data-scale="3"></span></span><b>여자</b></div>
+      </div>
+      <p style="font:11px/1.7 var(--f); color:var(--ink-2); margin-top:24px">헤어·옷·악세서리는 성별과 상관없이 모두 고를 수 있어요.</p>
+      <p class="skip" style="margin-top:12px"><span class="linkish">선택하지 않고 시작할래요</span><span class="tag">결정 필요</span></p>
+    </div>
+    <div class="m-cta"><span class="btn block">이 캐릭터로 시작 <i class="ic" data-icon="arrow" data-scale="3"></i></span></div>
+  </section>
+  <div aria-hidden="true"></div>
+  <div aria-hidden="true"></div>
+
+  <!-- ═════════ 02 기분 고르기 ═════════ -->
+  <section class="frame d" data-doan-frame="mood-pick" data-doan-title="02 기분 고르기">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</div>
+      <ol class="steps"><li class="on"><b>1</b>기분</li><li><b>2</b>꾸미기</li><li><b>3</b>공유</li></ol>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <div class="pick">
+      <h1>오늘 기분이 어때요?</h1>
+      <p class="sub">고른 기분에 맞춰 표정과 배경을 먼저 골라둘게요. 꾸미면서 언제든 바꿀 수 있어요.</p>
+      <div class="mood-grid" data-doan-id="mood-grid">
+        <button class="mood" style="--mc:#FFD23F; --ms:#FFF0B3"><span class="px-art" data-px data-mood="happy" data-bg="none" data-crop="charHead" data-scale="4"></span>행복해요</button>
+        <button class="mood on" style="--mc:#FF7EB6; --ms:#FFD6E8" data-doan-id="mood-selected"><span class="check"><i class="ic" data-icon="check" data-ink="#FFFFFF" data-scale="2"></i></span><span class="px-art" data-px data-mood="excited" data-bg="none" data-crop="charHead" data-scale="4"></span>설레요</button>
+        <button class="mood" style="--mc:#7ED9C3; --ms:#D3F4EA"><span class="px-art" data-px data-mood="calm" data-bg="none" data-crop="charHead" data-scale="4"></span>평온해요</button>
+        <button class="mood" style="--mc:#B8A7E8; --ms:#E6DFFA"><span class="px-art" data-px data-mood="tired" data-bg="none" data-crop="charHead" data-scale="4"></span>피곤해요</button>
+        <button class="mood" style="--mc:#7AA7FF; --ms:#D6E4FF"><span class="px-art" data-px data-mood="sad" data-bg="none" data-crop="charHead" data-scale="4"></span>우울해요</button>
+        <button class="mood" style="--mc:#FF6B57; --ms:#FFD5CE"><span class="px-art" data-px data-mood="angry" data-bg="none" data-crop="charHead" data-scale="4"></span>화나요</button>
+        <button class="mood" style="--mc:#C9CDD6; --ms:#EEF0F3"><span class="px-art" data-px data-mood="blank" data-bg="none" data-crop="charHead" data-scale="4"></span>멍해요</button>
+        <button class="mood free" data-doan-id="mood-free"><span class="plus"><i class="ic" data-icon="plus" data-ink="#958BA8" data-scale="5"></i></span>직접 쓰기</button>
+      </div>
+      <div class="amount" data-doan-id="mood-amount">
+        <span class="label">얼마나 설레요?</span>
+        <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="4"></span>
+        <span class="scale">조금 ··· 아주 많이</span>
+      </div>
+      <div class="memo" data-doan-id="mood-memo">
+        <span class="label">한 줄 메모 (선택)</span>
+        <div class="field"><span>첫 출근 날! 떨리지만 기대돼</span><span>14/30</span></div>
+      </div>
+    </div>
+    <aside class="preview card lift" data-doan-id="pick-preview">
+      <div class="head"><span class="label">미리보기</span><span class="mood-pill"><b>설레요</b><span class="hearts" data-hearts="3" data-c="#FF7EB6"></span></span></div>
+      <span class="px-art" data-px data-mood="excited" data-scale="7"></span>
+      <p class="why">설레는 날엔 표정 <b>'두근'</b>과 배경 <b>'꽃밭'</b>을 먼저 골라뒀어요. 다음 단계에서 마음대로 바꿔보세요.</p>
+      <span class="btn block" data-doan-id="pick-next">꾸미러 가기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+    </aside>
+  </section>
+
+  <!-- ═════════ 03 꾸미기 (눌러볼 수 있음) ═════════ -->
+  <section class="frame d" data-doan-frame="editor" data-doan-title="03 꾸미기 (인터랙티브)">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</div>
+      <ol class="steps"><li class="done"><b>1</b>기분</li><li class="on"><b>2</b>꾸미기</li><li><b>3</b>공유</li></ol>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <div class="stage-col">
+      <div class="stage-top">
+        <span class="mood-pill" data-doan-id="editor-mood"><span>오늘의 기분</span><b id="ed-mood-name">설레요</b><span class="hearts" id="ed-mood-hearts" data-hearts="3" data-c="#FF7EB6"></span></span>
+        <button class="linkish" id="ed-mood-next" data-doan-id="editor-mood-change">기분 바꾸기</button>
+      </div>
+      <div class="stage-box" data-doan-id="editor-stage"><span class="px-art" id="ed-stage" data-scale="11"></span></div>
+      <div class="tools" data-doan-id="editor-tools">
+        <button class="btn ghost sm" id="ed-undo"><i class="ic" data-icon="undo" data-scale="2"></i>되돌리기</button>
+        <button class="btn ghost sm" id="ed-redo"><i class="ic" data-icon="redo" data-scale="2"></i>다시하기</button>
+        <button class="btn yellow sm" id="ed-random"><i class="ic" data-icon="dice" data-scale="2"></i>랜덤</button>
+        <button class="btn ghost sm" id="ed-reset"><i class="ic" data-icon="reset" data-scale="2"></i>처음으로</button>
+      </div>
+    </div>
+    <div class="edit-panel card" data-doan-id="editor-panel">
+      <nav class="tabs" id="ed-tabs" data-doan-id="editor-tabs">
+        <button class="tab on" data-tab="hair"><i class="ic" data-icon="hair" data-c="#8B5A3C" data-scale="2"></i>헤어</button>
+        <button class="tab" data-tab="face"><i class="ic" data-icon="smile" data-c="#FFD23F" data-scale="2"></i>표정</button>
+        <button class="tab" data-tab="outfit"><i class="ic" data-icon="shirt" data-c="#FF9EC4" data-scale="2"></i>옷</button>
+        <button class="tab" data-tab="shoes"><i class="ic" data-icon="shoe" data-c="#FF6B57" data-scale="2"></i>신발</button>
+        <button class="tab" data-tab="acc"><i class="ic" data-icon="bow" data-c="#FF4F7B" data-scale="2"></i>악세서리</button>
+        <button class="tab" data-tab="bg"><i class="ic" data-icon="frame" data-c="#A6DDFF" data-scale="2"></i>배경</button>
+      </nav>
+      <div class="panel-body">
+        <div class="panel-title">
+          <h3 id="ed-title">헤어 스타일</h3>
+          <button class="toggle" id="ed-rec-toggle" data-doan-id="editor-rec-toggle"><span class="sw"></span><span>추천만 보기</span></button>
+        </div>
+        <div class="items" id="ed-items" data-doan-id="editor-items"></div>
+        <div class="colors" id="ed-colors" data-doan-id="editor-colors"></div>
+      </div>
+    </div>
+    <div class="edit-foot">
+      <span class="btn ghost">이전</span>
+      <span class="btn" data-doan-id="editor-done">완성하기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+    </div>
+  </section>
+
+  <!-- ═════════ B안 · 03 꾸미기 (A안 마크업 복사, id만 edb-) ═════════ -->
+  <section class="frame d" data-doan-frame="editor-b" data-doan-title="03 꾸미기 · B안 (인터랙티브)">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind <span class="b-mark">B안 제안 · 코드 없음</span></div>
+      <ol class="steps"><li class="done"><b>1</b>기분</li><li class="on"><b>2</b>꾸미기</li><li><b>3</b>공유</li></ol>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <div class="stage-col">
+      <div class="stage-top">
+        <span class="mood-pill" data-doan-id="editor-mood-b"><span>오늘의 기분</span><b id="edb-mood-name">설레요</b><span class="hearts" id="edb-mood-hearts" data-hearts="3" data-c="#FF7EB6"></span></span>
+        <button class="linkish" id="edb-mood-next" data-doan-id="editor-mood-change-b">기분 바꾸기</button>
+      </div>
+      <div class="stage-box" data-doan-id="editor-stage-b"><span class="px-art" id="edb-stage" data-scale="11"></span></div>
+      <div class="tools" data-doan-id="editor-tools-b">
+        <button class="btn ghost sm" id="edb-undo"><i class="ic" data-icon="undo" data-scale="2"></i>되돌리기</button>
+        <button class="btn ghost sm" id="edb-redo"><i class="ic" data-icon="redo" data-scale="2"></i>다시하기</button>
+        <button class="btn yellow sm" id="edb-random"><i class="ic" data-icon="dice" data-scale="2"></i>랜덤</button>
+        <button class="btn ghost sm" id="edb-reset"><i class="ic" data-icon="reset" data-scale="2"></i>처음으로</button>
+      </div>
+    </div>
+    <div class="edit-panel card" data-doan-id="editor-panel-b">
+      <nav class="tabs" id="edb-tabs" data-doan-id="editor-tabs-b">
+        <button class="tab on" data-tab="hair"><i class="ic" data-icon="hair" data-c="#8B5A3C" data-scale="2"></i>헤어</button>
+        <button class="tab" data-tab="face"><i class="ic" data-icon="smile" data-c="#FFD23F" data-scale="2"></i>표정</button>
+        <button class="tab" data-tab="outfit"><i class="ic" data-icon="shirt" data-c="#FF9EC4" data-scale="2"></i>옷</button>
+        <button class="tab" data-tab="shoes"><i class="ic" data-icon="shoe" data-c="#FF6B57" data-scale="2"></i>신발</button>
+        <button class="tab" data-tab="acc"><i class="ic" data-icon="bow" data-c="#FF4F7B" data-scale="2"></i>악세서리</button>
+        <button class="tab" data-tab="bg"><i class="ic" data-icon="frame" data-c="#A6DDFF" data-scale="2"></i>배경</button>
+      </nav>
+      <div class="panel-body">
+        <div class="panel-title">
+          <h3 id="edb-title">헤어 스타일</h3>
+          <button class="toggle" id="edb-rec-toggle" data-doan-id="editor-rec-toggle-b"><span class="sw"></span><span>추천만 보기</span></button>
+        </div>
+        <div class="items" id="edb-items" data-doan-id="editor-items-b"></div>
+        <div class="colors" id="edb-colors" data-doan-id="editor-colors-b"></div>
+      </div>
+    </div>
+    <div class="edit-foot">
+      <span class="btn ghost">이전</span>
+      <span class="btn" data-doan-id="editor-done-b">완성하기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+    </div>
+  </section>
+
+
+  <div aria-hidden="true"></div>
+
+  <!-- ═════════ 05 모바일 ═════════ -->
+  <div class="phones">
+    <section class="frame m" data-doan-frame="m-mood-pick" data-doan-title="M1 모바일 · 기분 고르기">
+      <div class="status"><span>9:41</span><span class="batt"></span></div>
+      <div class="m-head"><i class="ic" data-icon="back" data-scale="3"></i><span class="count">1 / 3</span><span style="width:24px"></span></div>
+      <div class="m-bar"><i style="width:33%"></i></div>
+      <div class="m-body">
+        <h1>오늘 기분이 어때요?</h1>
+        <p class="sub">고른 기분에 맞춰 표정과 배경을 골라둘게요.</p>
+        <div class="m-moods" data-doan-id="m-mood-grid">
+          <div class="m-mood" style="--mc:#FFD23F; --ms:#FFF0B3"><span class="px-art" data-px data-mood="happy" data-bg="none" data-crop="charHead" data-scale="2"></span>행복해요</div>
+          <div class="m-mood on" style="--mc:#FF7EB6; --ms:#FFD6E8"><span class="check"><i class="ic" data-icon="check" data-ink="#FFFFFF" data-scale="2"></i></span><span class="px-art" data-px data-mood="excited" data-bg="none" data-crop="charHead" data-scale="2"></span>설레요</div>
+          <div class="m-mood" style="--mc:#7ED9C3; --ms:#D3F4EA"><span class="px-art" data-px data-mood="calm" data-bg="none" data-crop="charHead" data-scale="2"></span>평온해요</div>
+          <div class="m-mood" style="--mc:#B8A7E8; --ms:#E6DFFA"><span class="px-art" data-px data-mood="tired" data-bg="none" data-crop="charHead" data-scale="2"></span>피곤해요</div>
+          <div class="m-mood" style="--mc:#7AA7FF; --ms:#D6E4FF"><span class="px-art" data-px data-mood="sad" data-bg="none" data-crop="charHead" data-scale="2"></span>우울해요</div>
+          <div class="m-mood" style="--mc:#FF6B57; --ms:#FFD5CE"><span class="px-art" data-px data-mood="angry" data-bg="none" data-crop="charHead" data-scale="2"></span>화나요</div>
+          <div class="m-mood" style="--mc:#C9CDD6; --ms:#EEF0F3"><span class="px-art" data-px data-mood="blank" data-bg="none" data-crop="charHead" data-scale="2"></span>멍해요</div>
+          <div class="m-mood free"><i class="ic" data-icon="plus" data-ink="#958BA8" data-scale="2"></i>직접 쓰기</div>
+        </div>
+      </div>
+      <div class="m-cta"><span class="btn block">꾸미러 가기 <i class="ic" data-icon="arrow" data-scale="3"></i></span></div>
+    </section>
+
+    <section class="frame m" data-doan-frame="m-editor" data-doan-title="M2 모바일 · 꾸미기">
+      <div class="status"><span>9:41</span><span class="batt"></span></div>
+      <div class="m-head"><i class="ic" data-icon="back" data-scale="3"></i><span class="count">2 / 3</span><span class="btn sm">완성</span></div>
+      <div class="m-stage" data-doan-id="m-stage">
+        <span class="px-art" data-px data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-scale="6"></span>
+        <span class="mood-pill"><b>설레요</b><span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="1"></span></span>
+        <div class="m-tools"><span><i class="ic" data-icon="undo" data-scale="2"></i></span><span><i class="ic" data-icon="redo" data-scale="2"></i></span><span style="background:var(--yellow)"><i class="ic" data-icon="dice" data-scale="2"></i></span></div>
+      </div>
+      <div class="sheet" data-doan-id="m-sheet">
+        <div class="grip"></div>
+        <div class="m-tabs">
+          <span class="on"><i class="ic" data-icon="hair" data-c="#8B5A3C" data-scale="2"></i>헤어</span>
+          <span><i class="ic" data-icon="smile" data-c="#FFD23F" data-scale="2"></i>표정</span>
+          <span><i class="ic" data-icon="shirt" data-c="#FF9EC4" data-scale="2"></i>옷</span>
+          <span><i class="ic" data-icon="shoe" data-c="#FF6B57" data-scale="2"></i>신발</span>
+          <span><i class="ic" data-icon="bow" data-c="#FF4F7B" data-scale="2"></i>소품</span>
+          <span><i class="ic" data-icon="frame" data-c="#A6DDFF" data-scale="2"></i>배경</span>
+        </div>
+        <div class="m-items">
+          <div><div class="thumb"><span class="px-art" data-px data-mood="excited" data-hair="bob" data-bg="none" data-crop="charHead" data-scale="2"></span></div><p>단발</p></div>
+          <div><div class="thumb"><span class="rec"><span class="tag">추천</span></span><span class="px-art" data-px data-mood="excited" data-hair="long" data-bg="none" data-crop="charHead" data-scale="2"></span></div><p>긴 생머리</p></div>
+          <div><div class="thumb"><span class="px-art" data-px data-mood="excited" data-hair="bun" data-bg="none" data-crop="charHead" data-scale="2"></span></div><p>똥머리</p></div>
+          <div><div class="thumb"><span class="px-art" data-px data-mood="excited" data-hair="short" data-bg="none" data-crop="charHead" data-scale="2"></span></div><p>숏컷</p></div>
+          <div class="on"><div class="thumb"><span class="rec"><span class="tag">추천</span></span><span class="px-art" data-px data-mood="excited" data-hair="twin" data-bg="none" data-crop="charHead" data-scale="2"></span></div><p>양갈래</p></div>
+          <div><div class="thumb" style="box-shadow:none; outline:4px dashed var(--line-soft); outline-offset:-4px"><i class="ic" data-icon="lock" data-c="#EADFCB" data-ink="#958BA8" data-scale="2"></i></div><p style="color:var(--ink-3)">곧 추가</p></div>
+        </div>
+        <div class="m-colors"><span>헤어 컬러</span>
+          <span class="swatch on" style="background:#8B5A3C"></span><span class="swatch" style="background:#3D3552"></span><span class="swatch" style="background:#F5C95B"></span><span class="swatch" style="background:#FF8FB8"></span><span class="swatch" style="background:#6FD6C0"></span><span class="swatch" style="background:#9C7BE8"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="frame m" data-doan-frame="m-share" data-doan-title="M3 모바일 · 공유">
+      <div class="status"><span>9:41</span><span class="batt"></span></div>
+      <div class="m-head"><i class="ic" data-icon="close" data-scale="3"></i><span class="count">3 / 3</span><span style="width:24px"></span></div>
+      <article class="m-share-card" data-doan-id="m-share-card">
+        <div class="top"><span>TODAY'S MOOD</span><span>11.13 FRI</span></div>
+        <span class="px-art" data-px data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-scale="4"></span>
+        <div class="mood-name">설레요</div>
+        <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="2"></span>
+        <div class="bubble">첫 출근 날! 떨리지만 기대돼</div>
+        <div class="foot"><span>your mind</span><span style="font-weight:400; color:var(--ink-2)">나도 만들기 ▶</span></div>
+      </article>
+      <div class="m-share" data-doan-id="m-share-actions">
+        <div><span class="b" style="background:var(--mint)"><i class="ic" data-icon="link" data-scale="3"></i></span>링크 복사</div>
+        <div><span class="b" style="background:var(--pink)"><i class="ic" data-icon="camera" data-c="#FFFFFF" data-scale="3"></i></span>스토리</div>
+        <div><span class="b" style="background:var(--card)"><i class="ic" data-icon="chat" data-c="#FFE07A" data-scale="3"></i></span>카카오톡</div>
+        <div><span class="b" style="background:var(--card)"><i class="ic" data-icon="back" data-scale="3"></i></span>다시 꾸미기</div>
+      </div>
+      <div class="m-save"><span class="btn yellow block"><i class="ic" data-icon="down" data-scale="3"></i>이미지로 저장</span></div>
+    </section>
+  </div>
+
+  <!-- ═════════ 04 공유 ═════════ -->
+  <section class="frame d" data-doan-frame="share" data-doan-title="04 완성 & 공유">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</div>
+      <ol class="steps"><li class="done"><b>1</b>기분</li><li class="done"><b>2</b>꾸미기</li><li class="on"><b>3</b>공유</li></ol>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <article class="share-card" data-doan-id="share-card">
+      <div class="top"><span>TODAY'S MOOD</span><span>2026.11.13 FRI</span></div>
+      <span class="px-art" data-px data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-scale="6"></span>
+      <div class="mood-name">설레요</div>
+      <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="3"></span>
+      <div class="bubble">첫 출근 날! 떨리지만 기대돼</div>
+      <div class="foot"><span style="display:flex;gap:8px;align-items:center"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind</span><span style="font:11px/1 var(--f); color:var(--ink-2)">나도 만들기 ▶</span></div>
+    </article>
+    <div class="share-side">
+      <div class="confetti">
+        <i class="ic" data-icon="sparkle" data-c="#FFD23F" data-scale="4"></i><i class="ic" data-icon="star" data-c="#FF7EB6" data-scale="3"></i>
+        <i class="ic" data-icon="sparkle" data-c="#7ED9C3" data-scale="3"></i><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>
+        <i class="ic" data-icon="sparkle" data-c="#7AA7FF" data-scale="4"></i>
+      </div>
+      <h1>짜잔! 오늘의 내가 완성됐어요</h1>
+      <p class="sub">카드로 저장하거나, 링크로 친구에게 오늘 기분을 보여주세요.</p>
+      <div class="seg" data-doan-id="share-ratio"><span class="on">스토리 9:16</span><span>정사각형 1:1</span></div>
+      <div class="share-grid" data-doan-id="share-actions">
+        <span class="btn yellow"><i class="ic" data-icon="down" data-scale="3"></i>이미지로 저장</span>
+        <span class="btn mint"><i class="ic" data-icon="link" data-scale="3"></i>링크 복사</span>
+        <span class="btn"><i class="ic" data-icon="camera" data-c="#FFFFFF" data-scale="3"></i>인스타그램 스토리</span>
+        <span class="btn ghost"><i class="ic" data-icon="chat" data-c="#FFE07A" data-scale="3"></i>카카오톡으로 보내기</span>
+      </div>
+      <div class="og-wrap" data-doan-id="share-og">
+        <div class="og">
+          <div class="img">
+            <span class="px-art" data-px data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-bg="none" data-crop="char" data-scale="4"></span>
+            <span style="font:700 22px/1.4 var(--f)">오늘의 기분<br>설레요 ♥</span>
+          </div>
+          <div class="txt"><b>닉네임님의 오늘 기분은 '설레요'</b>첫 출근 날! 떨리지만 기대돼<br><span>링크 미리보기 예시</span></div>
+        </div>
+        <div class="og-side">
+          <p class="label" style="line-height:1.7">링크를 보내면<br>이렇게 보여요</p>
+          <div class="share-foot" data-doan-id="share-restart">
+            <span class="btn ghost sm"><i class="ic" data-icon="back" data-scale="2"></i>다시 꾸미기</span>
+            <span class="linkish">처음부터 새로 만들기</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ B안 · 04 공유 ═════════ -->
+  <section class="frame d" data-doan-frame="share-b" data-doan-title="04 완성 & 공유 · B안">
+    <div class="dots"></div>
+    <header class="nav">
+      <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind <span class="b-mark">B안 제안 · 코드 없음</span></div>
+      <ol class="steps"><li class="done"><b>1</b>기분</li><li class="done"><b>2</b>꾸미기</li><li class="on"><b>3</b>공유</li></ol>
+      <span class="date">2026.11.13 FRI</span>
+    </header>
+    <article class="share-card" data-doan-id="share-card-b">
+      <div class="top"><span>TODAY'S MOOD</span><span>2026.11.13 FRI</span></div>
+      <span class="px-art" data-px data-style="b" data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-scale="6"></span>
+      <div class="mood-name">설레요</div>
+      <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="3"></span>
+      <div class="bubble">첫 출근 날! 떨리지만 기대돼</div>
+      <div class="foot"><span style="display:flex;gap:8px;align-items:center"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind</span><span style="font:11px/1 var(--f); color:var(--ink-2)">나도 만들기 ▶</span></div>
+    </article>
+    <div class="share-side">
+      <div class="confetti">
+        <i class="ic" data-icon="sparkle" data-c="#FFD23F" data-scale="4"></i><i class="ic" data-icon="star" data-c="#FF7EB6" data-scale="3"></i>
+        <i class="ic" data-icon="sparkle" data-c="#7ED9C3" data-scale="3"></i><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>
+        <i class="ic" data-icon="sparkle" data-c="#7AA7FF" data-scale="4"></i>
+      </div>
+      <h1>짜잔! 오늘의 내가 완성됐어요</h1>
+      <p class="sub">카드로 저장하거나, 링크로 친구에게 오늘 기분을 보여주세요.</p>
+      <div class="seg" data-doan-id="share-ratio-b"><span class="on">스토리 9:16</span><span>정사각형 1:1</span></div>
+      <div class="share-grid" data-doan-id="share-actions-b">
+        <span class="btn yellow"><i class="ic" data-icon="down" data-scale="3"></i>이미지로 저장</span>
+        <span class="btn mint"><i class="ic" data-icon="link" data-scale="3"></i>링크 복사</span>
+        <span class="btn"><i class="ic" data-icon="camera" data-c="#FFFFFF" data-scale="3"></i>인스타그램 스토리</span>
+        <span class="btn ghost"><i class="ic" data-icon="chat" data-c="#FFE07A" data-scale="3"></i>카카오톡으로 보내기</span>
+      </div>
+      <div class="og-wrap" data-doan-id="share-og-b">
+        <div class="og">
+          <div class="img">
+            <span class="px-art" data-px data-style="b" data-mood="excited" data-hair="twin" data-outfit="dress" data-shoes="maryjane" data-acc="bow" data-bg="none" data-crop="char" data-scale="4"></span>
+            <span style="font:700 22px/1.4 var(--f)">오늘의 기분<br>설레요 ♥</span>
+          </div>
+          <div class="txt"><b>닉네임님의 오늘 기분은 '설레요'</b>첫 출근 날! 떨리지만 기대돼<br><span>링크 미리보기 예시</span></div>
+        </div>
+        <div class="og-side">
+          <p class="label" style="line-height:1.7">링크를 보내면<br>이렇게 보여요</p>
+          <div class="share-foot" data-doan-id="share-restart-b">
+            <span class="btn ghost sm"><i class="ic" data-icon="back" data-scale="2"></i>다시 꾸미기</span>
+            <span class="linkish">처음부터 새로 만들기</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═════════ 06 파츠 라이브러리 ═════════ -->
+  <section class="frame lib wide" data-doan-frame="parts" data-doan-title="06 파츠 라이브러리 & 픽셀 규격">
+    <div class="lib-head">
+      <div>
+        <h2>파츠 라이브러리</h2>
+        <p>이번 시안에 그린 파츠 전부예요. 아래 색 점은 그 아이템을 '추천'하는 기분이에요.</p>
+      </div>
+      <p style="text-align:right">헤어 5 · 표정 7 · 옷 5 · 신발 4 · 악세서리 5 · 배경 7<br>색 슬롯으로 헤어 6색 · 옷 6색 · 피부 4톤을 바꿔요</p>
+    </div>
+    <div class="lib-cols" id="lib-cols" data-doan-id="parts-grid"></div>
+    <div class="lib-bottom">
+      <div>
+        <p class="label" style="margin-bottom:20px">레이어 쌓는 순서 · 아래에서 위로</p>
+        <div class="layers" id="lib-layers" data-doan-id="parts-layers"></div>
+      </div>
+      <div>
+        <p class="label" style="margin-bottom:20px">색 슬롯</p>
+        <div class="slots" id="lib-slots" data-doan-id="parts-slots"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="../assets/pixel-avatar.js"></script>
+<script src="../assets/pixel-avatar-b.js"></script>
+<script src="../assets/pixel-avatar-c.js"></script>
+<script>
+(function () {
+  const PA = window.PixelAvatar;
+
+  // ── 하트 강도 표시 ──
+  document.querySelectorAll('[data-hearts]').forEach(drawHearts);
+  function drawHearts(el) {
+    const n = Number(el.dataset.hearts), max = Number(el.dataset.max || 5), s = el.dataset.scale || 2;
+    el.innerHTML = Array.from({ length: max }, (_, i) =>
+      `<i class="ic" data-icon="heart" data-c="${i < n ? el.dataset.c : '#EADFCB'}" data-scale="${s}"></i>`).join('');
+  }
+  PA.renderAll();
+  if (window.PixelAvatarC) PixelAvatarC.renderAll();
+
+  // ═════════ 03 꾸미기: 눌러볼 수 있는 에디터 ═════════
+  // 썸네일: 헤어·표정·악세서리는 얼굴에 씌워서, 옷·신발은 아이템만 단독으로
+  const CATS = {
+    hair:   { title: '헤어 스타일', src: PA.HAIRS,   crop: 'charHead', scale: 4 },
+    face:   { title: '표정',       src: PA.FACES,   crop: 'charHead', scale: 4 },
+    outfit: { title: '옷',         src: PA.OUTFITS, crop: 'charBody', scale: 5, only: ['outfit'] },
+    shoes:  { title: '신발',       src: PA.SHOES,   crop: 'charFeet', scale: 6, only: ['shoes'] },
+    acc:    { title: '악세서리',    src: PA.ACCS,    crop: 'charHead', scale: 4 },
+    bg:     { title: '배경',       src: PA.BGS,     crop: 'stage',    scale: 2 },
+  };
+  function thumb(cat, look, key) {
+    const c = CATS[cat], crop = PA.cropsFor(look.style)[c.crop];
+    const g = PA.compose(Object.assign({}, look, { [cat]: key }), { bg: cat === 'bg', only: c.only });
+    return `<span class="px-art" style="width:${crop[2] * c.scale}px;height:${crop[3] * c.scale}px">${PA.toSVG(g, crop)}</span>`;
+  }
+  const MOOD_ORDER = ['happy', 'excited', 'calm', 'tired', 'sad', 'angry', 'blank'];
+
+  // ✍️ 기분을 바꿨을 때 캐릭터를 어떻게 바꿀지 — 제품 성격이 정해지는 곳 (A안·B안 공통)
+  // 지금은 '표정·배경만 기분에 맞추고, 사용자가 꾸민 건 그대로 둔다'로 되어 있어요.
+  // mood.rec 에 기분별 추천 아이템(hair/outfit/shoes/acc/bg 배열)이 있으니 다른 방식도 가능해요.
+  function starterLook(moodId, current) {
+    const mood = PA.MOODS[moodId];
+    return Object.assign({}, current, { mood: moodId, face: mood.face, bg: mood.bg });
+  }
+
+  // 에디터 하나 = id 접두사(p) 하나. 'ed-' 는 A안, 'edb-' 는 B안
+  function mountEditor(p, style) {
+    const $ = id => document.getElementById(p + id);
+    if (!$('stage')) return;
+    const INITIAL = { style, mood: 'excited', face: 'excited', bg: 'flowers', hair: 'twin', hairColor: 'brown', skin: 'light',
+                      outfit: 'dress', outfitColor: 'pink', shoes: 'maryjane', acc: 'bow' };
+    let state = Object.assign({}, INITIAL);
+    let tab = 'hair', recOnly = false;
+    const past = [], future = [];
+    const stage = $('stage');
+
+    function set(patch) {
+      past.push(state); future.length = 0;
+      state = Object.assign({}, state, patch);
+      draw();
+    }
+
+    function isRec(cat, key) {
+      const mood = PA.MOODS[state.mood];
+      if (cat === 'face') return key === mood.face;
+      return (mood.rec[cat] || []).includes(key);
+    }
+
+    function draw() {
+      const mood = PA.MOODS[state.mood];
+      stage.innerHTML = PA.toSVG(PA.compose(state), PA.CROPS.stage, '꾸미는 중인 캐릭터');
+      stage.style.width = stage.style.height = 48 * 11 + 'px';
+      $('mood-name').textContent = mood.label;
+      const hearts = $('mood-hearts'); hearts.dataset.c = mood.color; drawHearts(hearts);
+      hearts.querySelectorAll('[data-icon]').forEach(PA.renderIcon);
+      $('rec-toggle').classList.toggle('on', recOnly);
+      $('undo').style.opacity = past.length ? 1 : .45;
+      $('redo').style.opacity = future.length ? 1 : .45;
+
+      $('tabs').querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+      const c = CATS[tab];
+      $('title').textContent = c.title;
+      let keys = Object.keys(c.src);
+      if (recOnly) keys = keys.filter(k => isRec(tab, k));
+      const cells = keys.map(k => `<button class="item${state[tab] === k ? ' on' : ''}" data-key="${k}">
+          ${isRec(tab, k) ? '<span class="rec"><span class="tag">추천</span></span>' : ''}
+          <span class="thumb">${thumb(tab, state, k)}</span>${c.src[k].name}</button>`);
+      while (cells.length < 8) cells.push('<div class="item soon"><span class="thumb">곧<br>추가돼요</span>&nbsp;</div>');
+      $('items').innerHTML = cells.slice(0, 8).join('');
+
+      $('colors').innerHTML = colorRows(tab);
+    }
+
+    function swatchRow(title, key, table, slot) {
+      return `<div><span class="label">${title}</span><div class="row">${Object.entries(table).map(([k, v]) =>
+        `<button class="swatch${state[key] === k ? ' on' : ''}" title="${v.name}" data-color-key="${key}" data-color="${k}" style="background:${v[slot]}"></button>`).join('')}</div></div>`;
+    }
+    function colorRows(t) {
+      if (t === 'hair') return swatchRow('헤어 컬러', 'hairColor', PA.HAIR_COLORS, 'H') + swatchRow('피부 톤', 'skin', PA.SKINS, 'S');
+      if (t === 'outfit') return swatchRow('옷 컬러', 'outfitColor', PA.OUTFIT_COLORS, 'O');
+      if (t === 'face') return swatchRow('피부 톤', 'skin', PA.SKINS, 'S');
+      if (t === 'bg') return '<p class="hint">\'기분 컬러\' 배경은 고른 기분의 색을 따라가요.</p>';
+      return '<p class="hint">신발·악세서리 색 바꾸기는 다음 버전에서 검토해요.</p>';
+    }
+
+    $('tabs').addEventListener('click', e => {
+      const t = e.target.closest('.tab'); if (!t) return;
+      tab = t.dataset.tab; draw();
+    });
+    $('items').addEventListener('click', e => {
+      const it = e.target.closest('.item[data-key]'); if (!it) return;
+      set({ [tab]: it.dataset.key });
+    });
+    $('colors').addEventListener('click', e => {
+      const s = e.target.closest('[data-color-key]'); if (!s) return;
+      set({ [s.dataset.colorKey]: s.dataset.color });
+    });
+    $('rec-toggle').addEventListener('click', () => { recOnly = !recOnly; draw(); });
+    $('mood-next').addEventListener('click', () => {
+      const next = MOOD_ORDER[(MOOD_ORDER.indexOf(state.mood) + 1) % MOOD_ORDER.length];
+      set(starterLook(next, state));
+    });
+    $('undo').addEventListener('click', () => { if (!past.length) return; future.push(state); state = past.pop(); draw(); });
+    $('redo').addEventListener('click', () => { if (!future.length) return; past.push(state); state = future.pop(); draw(); });
+    $('reset').addEventListener('click', () => set(Object.assign({}, INITIAL)));
+    $('random').addEventListener('click', () => {
+      const pick = o => { const k = Object.keys(o); return k[Math.floor(Math.random() * k.length)]; };
+      set({ hair: pick(PA.HAIRS), hairColor: pick(PA.HAIR_COLORS), outfit: pick(PA.OUTFITS), outfitColor: pick(PA.OUTFIT_COLORS),
+            shoes: pick(PA.SHOES), acc: pick(PA.ACCS) });
+    });
+    draw();
+  }
+  mountEditor('ed-', 'a');
+  mountEditor('edb-', 'b');
+
+  const $ = id => document.getElementById(id);
+
+  // ═════════ 06 파츠 라이브러리 ═════════
+  const LIB = [
+    ['hair', '헤어', '앞머리 + 뒷머리 2장'],
+    ['shoes', '신발', 'y29~32, 장화는 y27부터'],
+    ['face', '표정', '기분마다 기본 표정 1개'],
+    ['acc', '악세서리', '맨 위 레이어'],
+    ['outfit', '옷', '상의+하의 한 벌'],
+    ['bg', '배경', '48×48, 땅은 y40부터'],
+  ];
+  const base = { mood: 'calm', face: 'calm', hair: 'bob', outfit: 'stripe', outfitColor: 'sky', shoes: 'sneakers', acc: 'none', bg: 'sky' };
+  $('lib-cols').innerHTML = LIB.map(([cat, name, desc]) => {
+    const src = CATS[cat].src;
+    const items = Object.keys(src).map(k => {
+      const moods = Object.entries(PA.MOODS).filter(([, m]) => cat === 'face' ? m.face === k : (m.rec[cat] || []).includes(k))
+        .map(([, m]) => `<i style="background:${m.color}" title="${m.label}"></i>`).join('');
+      return `<div class="lib-item"><span class="thumb">${thumb(cat, base, k)}</span>${src[k].name}<span class="moods">${moods}</span></div>`;
+    }).join('');
+    return `<div class="lib-row"><div class="cat"><span class="tag">${Object.keys(src).length}개</span><h3>${name}</h3><p>${desc}</p></div><div class="lib-items">${items}</div></div>`;
+  }).join('');
+
+  const LAYER_NAMES = ['배경', '+ 그림자', '+ 뒷머리', '+ 몸', '+ 옷', '+ 신발', '+ 표정', '+ 앞머리', '+ 악세서리'];
+  const sample = { mood: 'excited', hair: 'long', outfit: 'overall', outfitColor: 'yellow', shoes: 'boots', acc: 'bow', bg: 'sky' };
+  $('lib-layers').innerHTML = LAYER_NAMES.map((n, i) =>
+    `<div class="ly"><span class="px-art" style="width:144px;height:144px">${PA.toSVG(PA.compose(sample, { upto: i + 1 }), PA.CROPS.stage)}</span><span>${n}</span></div>`).join('');
+
+  const slot = (title, table, keys) => `<div class="grp"><span>${title}</span>${Object.values(table).map(v =>
+    keys.map(k => `<span class="swatch" title="${v.name}" style="background:${v[k]}"></span>`).join('<span style="width:0"></span>')).join('<span style="width:8px"></span>')}</div>`;
+  $('lib-slots').innerHTML =
+    slot('헤어 H · h · L', PA.HAIR_COLORS, ['H']) +
+    slot('옷 O · o · A', PA.OUTFIT_COLORS, ['O']) +
+    slot('피부 S · s', PA.SKINS, ['S', 's']) +
+    `<p style="font:14px/1.7 var(--f14); color:var(--ink-2); margin-top:4px">외곽선 K #2B2140 고정 · 문자 하나 = 색 슬롯 하나.<br>파츠 하나만 그리면 색 조합은 슬롯이 해결해요.</p>`;
+  document.querySelectorAll('#lib-cols [data-icon], #lib-slots [data-icon]').forEach(PA.renderIcon);
+})();
+</script>
+</body>
+</html>

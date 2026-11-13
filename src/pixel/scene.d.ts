@@ -1,0 +1,11 @@
+import type { Grid, Look, MoodDef, Part } from './types';
+export const SW: number;
+export const SH: number;
+export const PW: number;
+export const PH: number;
+export const FEET: number;
+export const BGS: Record<string, Part>;
+export const MOODS: Record<string, MoodDef>;
+export function stage(look: Look): Grid;
+export function plaza(actors: { x: number; look: Look }[]): Grid;
+export function withMood(look: Look): Look;
