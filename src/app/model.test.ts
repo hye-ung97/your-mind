@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { decodeCard, encodeCard } from './link';
-import { defaultLook, josa, longDate, moodInfo, sanitizeEntry, sanitizeLook, starterLook } from './model';
+import { NEW_ENTRY, defaultLook, freshStart, josa, longDate, moodInfo, sanitizeEntry, sanitizeLook, starterLook } from './model';
 
 describe('starterLook', () => {
   it('기분을 바꾸면 표정·배경만 바뀌고 옷은 그대로예요', () => {
@@ -53,5 +53,17 @@ describe('josa', () => {
     expect(josa('꽃밭', '을', '를')).toBe('을');
     expect(josa('기분 컬러', '을', '를')).toBe('를');
     expect(josa('두근', '과', '와')).toBe('과');
+  });
+});
+
+describe('freshStart', () => {
+  it('캐릭터를 고르면 그 성별의 기본 코디와 새 기록으로 시작해요', () => {
+    const before = { v: 1 as const, gender: 'f' as const, lastDone: '2026.11.12 THU',
+      look: { ...defaultLook('f'), hair: 'bob', acc: 'crown' }, entry: { mood: 'sad' as const, customLabel: '', amount: 5, memo: '우울' } };
+    const next = freshStart(before, 'f');
+    expect(next.look).toEqual(starterLook(NEW_ENTRY.mood, defaultLook('f')));
+    expect(next.entry).toEqual(NEW_ENTRY);
+    expect(next.lastDone).toBe('2026.11.12 THU');
+    expect(freshStart(before, 'm').look.gender).toBe('m');
   });
 });

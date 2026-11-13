@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { decodeCard } from './app/link';
-import { type Entry, type Saved, defaultLook, load, longDate, save, starterLook } from './app/model';
+import { type Entry, type Saved, freshStart, load, longDate, save } from './app/model';
 import type { Gender, Look } from './pixel/types';
 import Landing from './screens/Landing';
 import Start from './screens/Start';
@@ -57,12 +57,13 @@ export default function App() {
     toast,
   };
 
-  // 처음 고른 캐릭터를 기억하고, 바로 기분 고르기로
+  // 캐릭터를 고르면 그 캐릭터의 기본 코디로 새로 시작해서 기분 고르기로
   const chooseGender = (g: Gender) => {
-    setSaved(s => ({ ...s, gender: g, look: starterLook(s.entry.mood, s.gender === g ? s.look : defaultLook(g)) }));
+    setSaved(s => freshStart(s, g));
     go('mood');
   };
-  const begin = () => go(saved.gender ? 'mood' : 'start');
+  // 홈·친구 카드에서 시작하면 언제나 기본 캐릭터 고르기부터
+  const begin = () => go('start');
 
   let screen: JSX.Element;
   const needsGender = (r: Route) => (r === 'mood' || r === 'edit' || r === 'share') && !saved.gender;
@@ -76,7 +77,7 @@ export default function App() {
   } else if (route === 'edit') {
     screen = <Editor ctx={ctx} onBack={() => go('mood')} onDone={() => { setSaved(s => ({ ...s, lastDone: longDate(today) })); go('share'); }} />;
   } else if (route === 'share') {
-    screen = <Share ctx={ctx} onEdit={() => go('edit')} onRestart={() => { setSaved(s => ({ ...s, entry: { ...s.entry, memo: '' } })); go('mood'); }} />;
+    screen = <Share ctx={ctx} onEdit={() => go('edit')} onRestart={() => go('start')} />;
   } else {
     screen = <Landing ctx={ctx} onStart={begin} />;
   }

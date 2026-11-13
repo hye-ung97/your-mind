@@ -60,6 +60,12 @@ export const NEW_ENTRY: Entry = { mood: 'excited', customLabel: '', amount: 3, m
 export interface Saved { v: 1; gender?: Gender; look: Look; entry: Entry; lastDone?: string }
 const KEY = 'your-mind:v1';
 
+/** 캐릭터 고르기에서 새로 시작할 때: 고른 성별의 기본 코디 + 새 기록으로 (전에 꾸민 건 지워요) */
+export function freshStart(s: Saved, gender: Gender): Saved {
+  const entry: Entry = { ...NEW_ENTRY };
+  return { ...s, gender, look: starterLook(entry.mood, defaultLook(gender)), entry };
+}
+
 export function load(): Saved {
   const fresh: Saved = { v: 1, look: defaultLook('f'), entry: { ...NEW_ENTRY } };
   try {

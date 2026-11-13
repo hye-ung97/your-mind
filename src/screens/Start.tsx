@@ -13,11 +13,11 @@ export default function Start({ ctx, onPick }: { ctx: AppCtx; onPick: (g: Gender
   return (
     <div className="page sky">
       <Stars n={50} seed={2} />
-      <Nav date={ctx.date} mark="처음 한 번만" />
+      <Nav date={ctx.date} mark="새로 시작" />
       <main className="wrap start">
         <div className="center-title">
           <h1 className="t-sky">어떤 캐릭터로 시작할까요?</h1>
-          <p className="sub-sky">처음 한 번만 골라요. 고른 캐릭터는 기억해두고, 꾸미기에서 언제든 바꿀 수 있어요.</p>
+          <p className="sub-sky">고른 캐릭터의 기본 코디로 새로 시작해요. 꾸미기에서 언제든 바꿀 수 있어요.</p>
         </div>
         <div className="g-wins" role="radiogroup" aria-label="시작 캐릭터">
           {OPTIONS.map(o => (
