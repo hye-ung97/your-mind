@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="doan:canvas" content="favicon">
+<meta name="doan:width" content="2680">
+<title>your mind — 파비콘 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+/* C안 팔레트 (mood-maker-c.html 과 같은 값) */
+:root{
+  --night:#1A1838; --d1:#211F4F; --d2:#2B2A63; --d3:#3A3778; --d4:#4E4590; --d5:#6A519E;
+  --band:#4B4796;
+  --parch:#FFF6E3; --parch-2:#F6E8C8; --parch-3:#E2CFA6; --parch-4:#B79E72;
+  --ink:#2B2140; --ink-2:#5E5478; --ink-3:#8C83A3; --cream:#FFF6E3; --lilac:#CFC8F0;
+  --gold:#FFC94A; --gold-hi:#FFE6A0; --gold-lo:#C98A1E;
+  --indigo:#4B4FA0; --indigo-hi:#7A7FD0;
+  --pink:#FF7EB6; --mint:#7ED9C3;
+  --drop:rgba(10,8,30,.35);
+  --f:'Galmuri11', ui-monospace, monospace;
+  --f14:'Galmuri14', 'Galmuri11', ui-monospace, monospace;
+  --sys:-apple-system, 'Apple SD Gothic Neo', 'Segoe UI', system-ui, sans-serif;
+  --sky:linear-gradient(var(--d1) 0 16%, var(--d2) 16% 38%, var(--d3) 38% 60%, var(--d4) 60% 82%, var(--d5) 82%);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#E6E1EE; color:var(--ink); font-family:var(--f); -webkit-font-smoothing:none}
+p{margin:0} h1,h2,h3{margin:0; font-weight:700} ul{margin:0; padding:0; list-style:none}
+figure{margin:0}
+
+/* ── 보드 ── */
+.board{width:2680px; padding:80px; display:grid; grid-template-columns:repeat(3, 800px); gap:72px 60px; align-items:start}
+.board-head{grid-column:1 / -1; display:flex; justify-content:space-between; align-items:flex-end; gap:40px}
+.board-head h1{font:700 44px/1.3 var(--f)}
+.board-head p{font:14px/1.8 var(--f14); color:var(--ink-2); max-width:1100px; text-align:right}
+.wide{grid-column:1 / -1}
+
+/* ── 게임 창 (C안) ── */
+.win{position:relative; background:var(--parch);
+  box-shadow:inset 0 0 0 3px var(--parch-3), 0 0 0 3px var(--band), 0 0 0 6px var(--night), 0 12px 0 6px var(--drop)}
+.win > .bar{display:flex; align-items:center; gap:8px; height:40px; margin:3px 3px 0; padding:0 14px;
+  background:linear-gradient(var(--indigo-hi) 0 3px, var(--indigo) 3px); color:var(--cream);
+  font:700 14px/1 var(--f14); text-shadow:2px 2px 0 var(--night); box-shadow:0 3px 0 0 var(--night)}
+.win > .bar .right{margin-left:auto; display:flex; gap:8px; align-items:center}
+.win .body{padding:24px}
+.gem{display:inline-block; flex:none; width:12px; height:12px; background:var(--c, var(--gold));
+  box-shadow:inset -2px -2px 0 rgba(0,0,0,.25), inset 2px 2px 0 rgba(255,255,255,.55), 0 0 0 2px var(--night)}
+.tag{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; font:11px/1 var(--f); background:var(--night); color:var(--cream); text-shadow:none}
+.tag.gold{background:var(--gold); color:var(--ink); box-shadow:0 0 0 2px var(--night)}
+.label{display:block; font:700 14px/1 var(--f14); color:var(--ink-2); margin-bottom:10px}
+.hint{font:14px/1.6 var(--f14); color:var(--ink-3)}
+.note{background:var(--gold-hi); box-shadow:0 0 0 2px var(--night); padding:12px 14px; font:14px/1.6 var(--f14); color:var(--ink)}
+.note b{display:block; margin-bottom:2px}
+
+/* ── 파비콘 그림 ── */
+.fav{display:inline-block; flex:none; line-height:0}
+.fav svg{display:block; width:100%; height:100%}
+
+/* ── 00 비교: 브라우저 탭 ── */
+.cmp-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px}
+.cmp-head p{font:14px/1.7 var(--f14); color:var(--ink-2)}
+.chromes{display:grid; grid-template-columns:1fr 1fr; gap:32px}
+.chrome{border-radius:10px 10px 0 0; overflow:hidden; font:12px/1 var(--sys); box-shadow:0 0 0 2px var(--night)}
+.chrome .strip{display:flex; align-items:flex-end; height:46px; padding:0 8px}
+.ctab{position:relative; display:flex; align-items:center; gap:8px; flex:1; height:36px; padding:0 12px; border-radius:8px 8px 0 0; white-space:nowrap; overflow:hidden}
+.ctab .t{flex:1; overflow:hidden; text-overflow:ellipsis}
+.ctab .x{font-size:14px; opacity:.6}
+.ctab + .ctab::before{content:''; position:absolute; left:0; top:10px; bottom:10px; width:1px}
+.ctab.on::before, .ctab.on + .ctab::before{display:none}
+.chrome .omni{display:flex; align-items:center; gap:10px; height:44px; padding:0 12px}
+.chrome .omni .nav-dots{display:flex; gap:14px; padding:0 6px; font-size:15px; opacity:.55}
+.chrome .omni .url{flex:1; display:flex; align-items:center; height:32px; padding:0 16px; border-radius:16px}
+.chrome.light .strip{background:#DEE1E6} .chrome.light .ctab{color:#3C4043}
+.chrome.light .ctab.on, .chrome.light .omni{background:#FFFFFF}
+.chrome.light .ctab + .ctab::before{background:#9AA0A6}
+.chrome.light .omni{color:#3C4043} .chrome.light .omni .url{background:#F1F3F4}
+.chrome.dark .strip{background:#202124} .chrome.dark .ctab{color:#E8EAED}
+.chrome.dark .ctab.on, .chrome.dark .omni{background:#35363A}
+.chrome.dark .ctab + .ctab::before{background:#5F6368}
+.chrome.dark .omni{color:#E8EAED} .chrome.dark .omni .url{background:#202124}
+.chrome-cap{margin-top:10px; font:11px/1 var(--f); color:var(--ink-3)}
+.pinned{display:flex; gap:0; margin-right:6px}
+.pinned .ctab{flex:none; width:42px; padding:0; justify-content:center}
+
+.cmp-cards{display:grid; grid-template-columns:repeat(5, 1fr); gap:24px; margin-top:32px}
+.cmp-card h3{display:flex; align-items:center; gap:8px; font:700 14px/1 var(--f14); margin-bottom:12px}
+
+/* 실제 크기 줄 (밝은 / 어두운 바탕) */
+.sizes{display:flex; flex-direction:column; gap:8px}
+.sz-row{display:flex; align-items:flex-end; gap:22px; padding:14px 16px 10px; box-shadow:0 0 0 2px var(--night)}
+.sz-row.light{background:#FFFFFF}
+.sz-row.dark{background:#35363A}
+.sz-row figure{display:flex; flex-direction:column; align-items:center; gap:8px}
+.sz-row figcaption{font:11px/1 var(--f); color:var(--ink-3)}
+.sz-row.dark figcaption{color:#9AA0A6}
+
+/* ── 안별 프레임 ── */
+.win.pick{box-shadow:inset 0 0 0 3px var(--gold-hi), 0 0 0 3px var(--gold), 0 0 0 6px var(--night), 0 12px 0 6px var(--drop)}
+.win.pick > .bar{background:linear-gradient(var(--gold-hi) 0 3px, var(--gold) 3px); color:var(--ink); text-shadow:none}
+.opt .concept{font:14px/1.7 var(--f14); color:var(--ink); margin-bottom:20px; min-height:48px}
+.opt-main{display:flex; gap:24px}
+.big{position:relative; flex:none; width:256px; height:256px;
+  background:repeating-conic-gradient(#EFEAF5 0 25%, #FFFFFF 0 50%) 0 0 / 32px 32px; box-shadow:0 0 0 2px var(--night)}
+.big::after{content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:linear-gradient(to right, rgba(26,24,56,.14) 1px, transparent 1px), linear-gradient(to bottom, rgba(26,24,56,.14) 1px, transparent 1px);
+  background-size:16px 16px}
+.big .grid-cap{position:absolute; left:0; bottom:-22px; font:11px/1 var(--f); color:var(--ink-3)}
+.opt-side{flex:1; display:flex; flex-direction:column; gap:18px; min-width:0}
+.home-row{display:flex; gap:16px; align-items:center}
+.home-wall{flex:none; display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 18px 10px; border-radius:14px;
+  background:linear-gradient(160deg, #8E86D8, #CFC8F0); box-shadow:0 0 0 2px var(--night)}
+.home{position:relative; width:72px; height:72px; border-radius:17px; overflow:hidden; background:var(--sky); display:flex; align-items:center; justify-content:center}
+.home-wall span{font:11px/1 var(--sys); color:#FFFFFF; text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.pc{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:34px}
+.pc li{position:relative; padding-left:18px; font:14px/1.6 var(--f14); color:var(--ink)}
+.pc li + li{margin-top:6px}
+.pc li::before{content:''; position:absolute; left:2px; top:7px; width:8px; height:8px; background:var(--c); box-shadow:0 0 0 2px var(--night)}
+.pc .pros{--c:var(--mint)} .pc .cons{--c:var(--gold)}
+
+/* ── 적용 메모 ── */
+.apply h2{font:700 22px/1.3 var(--f); margin-bottom:6px}
+.files{margin:18px 0 20px; display:flex; flex-direction:column; gap:10px}
+.files li{display:grid; grid-template-columns:230px 1fr; gap:12px; align-items:start; padding:10px 12px; background:var(--parch-2);
+  box-shadow:inset -2px -2px 0 var(--parch-3), 0 0 0 2px var(--parch-4); font:14px/1.6 var(--f14)}
+.files code{font:700 12px/1.6 ui-monospace, monospace; color:var(--ink)}
+pre.code{margin:0 0 20px; padding:14px 16px; background:var(--night); color:var(--lilac); font:12px/1.7 ui-monospace, monospace; white-space:pre; overflow:hidden;
+  box-shadow:0 0 0 2px var(--band)}
+pre.code .c{color:var(--ink-3)}
+.apply .note + .note{margin-top:14px}
+</style>
+</head>
+<body>
+<main class="board">
+  <header class="board-head">
+    <h1>your mind — 파비콘 시안</h1>
+    <p>16×16 픽셀 그리드 하나로 탭·북마크·홈 화면 아이콘을 모두 만들어요. 색은 C안 팔레트를 그대로 썼어요.<br>
+      <b>C안(캐릭터 얼굴)을 골라 앱에 넣었어요</b> — public/favicon.svg · favicon.ico. 나머지 안은 비교용으로 남겨둬요.</p>
+  </header>
+
+  <!-- ═════════ 00 비교 ═════════ -->
+  <section class="win wide" data-doan-frame="compare" data-doan-title="00 한눈에 비교 (실제 탭)">
+    <div class="bar"><i class="gem"></i>00 한눈에 비교 — 실제 브라우저 탭에서<span class="right"><span class="tag gold">선택: C안 · 캐릭터 얼굴</span></span></div>
+    <div class="body">
+      <div class="cmp-head">
+        <p>크롬 기본 테마의 탭 바예요. 파비콘은 16px(레티나 화면에선 32px)로 그려지고, 고정 탭에선 파비콘만 남아요.</p>
+      </div>
+      <div class="chromes">
+        <div>
+          <div class="chrome light" data-doan-id="tabs-light">
+            <div class="strip">
+              <div class="pinned">
+                <div class="ctab"><span class="fav" data-fav="a" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="b" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="c" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="d" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="e" data-s="16"></span></div>
+              </div>
+              <div class="ctab on"><span class="fav" data-fav="a" data-s="16"></span><span class="t">A · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="b" data-s="16"></span><span class="t">B · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="c" data-s="16"></span><span class="t">C · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="d" data-s="16"></span><span class="t">D · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="e" data-s="16"></span><span class="t">E · your mind · 오늘의 기분</span><span class="x">×</span></div>
+            </div>
+            <div class="omni"><span class="nav-dots">← → ↻</span><span class="url">localhost:5173/#/</span></div>
+          </div>
+          <p class="chrome-cap">밝은 테마 · 왼쪽 다섯 칸은 고정 탭</p>
+        </div>
+        <div>
+          <div class="chrome dark" data-doan-id="tabs-dark">
+            <div class="strip">
+              <div class="pinned">
+                <div class="ctab"><span class="fav" data-fav="a" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="b" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="c" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="d" data-s="16"></span></div>
+                <div class="ctab"><span class="fav" data-fav="e" data-s="16"></span></div>
+              </div>
+              <div class="ctab on"><span class="fav" data-fav="a" data-s="16"></span><span class="t">A · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="b" data-s="16"></span><span class="t">B · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="c" data-s="16"></span><span class="t">C · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="d" data-s="16"></span><span class="t">D · your mind · 오늘의 기분</span><span class="x">×</span></div>
+              <div class="ctab"><span class="fav" data-fav="e" data-s="16"></span><span class="t">E · your mind · 오늘의 기분</span><span class="x">×</span></div>
+            </div>
+            <div class="omni"><span class="nav-dots">← → ↻</span><span class="url">localhost:5173/#/</span></div>
+          </div>
+          <p class="chrome-cap">어두운 테마</p>
+        </div>
+      </div>
+
+      <div class="cmp-cards">
+        <div class="cmp-card" data-doan-id="cmp-a"><h3><i class="gem" style="--c:#FF7EB6"></i>A안 · 로고 하트</h3><div class="sizes" data-fav="a"></div></div>
+        <div class="cmp-card" data-doan-id="cmp-b"><h3><i class="gem" style="--c:#4E4590"></i>B안 · 밤하늘 타일</h3><div class="sizes" data-fav="b"></div></div>
+        <div class="cmp-card" data-doan-id="cmp-c"><h3><i class="gem" style="--c:#F08DB5"></i>C안 · 캐릭터 얼굴</h3><div class="sizes" data-fav="c"></div></div>
+        <div class="cmp-card" data-doan-id="cmp-d"><h3><i class="gem" style="--c:#FFF6E3"></i>D안 · 기분 말풍선</h3><div class="sizes" data-fav="d"></div></div>
+        <div class="cmp-card" data-doan-id="cmp-e"><h3><i class="gem" style="--c:#7ED9C3"></i>E안 · 기분 무지개 하트</h3><div class="sizes" data-fav="e"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ A안 ═════════ -->
+  <section class="win opt" data-doan-frame="opt-a" data-doan-title="A안 · 로고 하트">
+    <div class="bar"><i class="gem" style="--c:#FF7EB6"></i>A안 · 로고 하트</div>
+    <div class="body">
+      <p class="concept">상단 바 로고의 분홍 하트를 16칸에 꽉 차게 다시 찍었어요. 로고와 파비콘이 같은 그림이라 가장 자연스럽게 이어져요.</p>
+      <div class="opt-main">
+        <div class="big" data-doan-id="a-big"><span class="fav" data-fav="a" data-s="256"></span><span class="grid-cap">16 × 16 · 1칸 = 16px 확대</span></div>
+        <div class="opt-side">
+          <div><span class="label">실제 크기</span><div class="sizes" data-fav="a"></div></div>
+          <div><span class="label">홈 화면 아이콘</span>
+            <div class="home-row"><div class="home-wall"><div class="home" data-fav="a"></div><span>your mind</span></div>
+              <p class="hint">하트만으론 바탕이 비어서 밤하늘 띠를 깔았어요. 홈 화면 아이콘은 투명 부분이 검게 칠해지니 바탕이 꼭 필요해요.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc">
+        <div><span class="label">좋은 점</span><ul class="pros">
+          <li>16px에서도 모양이 꽉 차서 다섯 안 중 가장 잘 보여요</li>
+          <li>남색 외곽선 덕에 밝은·어두운 탭 모두 또렷해요</li>
+          <li>로고와 같아 브랜드가 하나로 보여요</li>
+        </ul></div>
+        <div><span class="label">고려할 점</span><ul class="cons">
+          <li>하트 파비콘은 흔해서 탭이 많을 땐 덜 튀어요</li>
+          <li>홈 화면용 바탕은 따로 정해야 해요 → B안 타일과 짝</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ B안 ═════════ -->
+  <section class="win opt" data-doan-frame="opt-b" data-doan-title="B안 · 밤하늘 타일">
+    <div class="bar"><i class="gem" style="--c:#4E4590"></i>B안 · 밤하늘 타일</div>
+    <div class="body">
+      <p class="concept">랜딩 화면의 밤하늘 띠 5단을 타일로 깔고, 가운데 하트와 금빛 반짝이를 올렸어요. 앱 첫 화면 분위기를 한 칸에 담았어요.</p>
+      <div class="opt-main">
+        <div class="big" data-doan-id="b-big"><span class="fav" data-fav="b" data-s="256"></span><span class="grid-cap">16 × 16 · 네 모서리 1칸은 비움</span></div>
+        <div class="opt-side">
+          <div><span class="label">실제 크기</span><div class="sizes" data-fav="b"></div></div>
+          <div><span class="label">홈 화면 아이콘</span>
+            <div class="home-row"><div class="home-wall"><div class="home" data-fav="b"></div><span>your mind</span></div>
+              <p class="hint">타일이 곧 아이콘이라 홈 화면·북마크·공유 미리보기까지 그대로 써요.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc">
+        <div><span class="label">좋은 점</span><ul class="pros">
+          <li>바탕까지 있어서 어디에 놓아도 한 장으로 끝나요</li>
+          <li>탭 사이에서 네모 덩어리로 눈에 잘 띄어요</li>
+        </ul></div>
+        <div><span class="label">고려할 점</span><ul class="cons">
+          <li>하트가 10칸으로 작아져 16px에선 반짝이·별이 거의 안 보여요</li>
+          <li>어두운 탭 바에선 남색 타일 경계가 흐려져요</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ C안 ═════════ -->
+  <section class="win opt pick" data-doan-frame="opt-c" data-doan-title="C안 · 캐릭터 얼굴 (선택)" data-doan-implements="public/favicon.svg">
+    <div class="bar"><i class="gem" style="--c:#F08DB5"></i>C안 · 캐릭터 얼굴<span class="right"><span class="tag">선택 · 앱에 적용</span></span></div>
+    <div class="body">
+      <p class="concept">앱의 주인공인 SD 캐릭터 얼굴이에요 (분홍 단발 · 웃는 얼굴). '픽셀 캐릭터를 꾸미는 앱'이라는 게 탭에서 바로 보여요.</p>
+      <div class="opt-main">
+        <div class="big" data-doan-id="c-big"><span class="fav" data-fav="c" data-s="256"></span><span class="grid-cap">16 × 16 · 머리색은 C안 '핑크' 팔레트</span></div>
+        <div class="opt-side">
+          <div><span class="label">실제 크기</span><div class="sizes" data-fav="c"></div></div>
+          <div><span class="label">홈 화면 아이콘</span>
+            <div class="home-row"><div class="home-wall"><div class="home" data-fav="c" data-tile="90" data-face="64"></div><span>your mind</span></div>
+              <p class="hint">실제 아이콘(180px · 가운데 · ×8)을 절반 크기로 보여줘요. 사방 여백 26px 라 둥근 모서리에 머리끝이 닿지 않아요.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc">
+        <div><span class="label">좋은 점</span><ul class="pros">
+          <li>다섯 안 중 가장 개성 있고 서비스가 뭔지 잘 말해줘요</li>
+          <li>기분별 표정으로 확장하기 좋아요</li>
+        </ul></div>
+        <div><span class="label">고려할 점</span><ul class="cons">
+          <li>16px에선 눈·입이 1칸이라 표정이 단순해져요</li>
+          <li>앱 캐릭터(48×64)를 줄인 게 아니라 따로 찍은 그림이에요</li>
+          <li>성별·머리색 하나를 '대표 얼굴'로 정해야 해요</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ D안 ═════════ -->
+  <section class="win opt" data-doan-frame="opt-d" data-doan-title="D안 · 기분 말풍선">
+    <div class="bar"><i class="gem" style="--c:#FFF6E3"></i>D안 · 기분 말풍선</div>
+    <div class="body">
+      <p class="concept">양피지 말풍선 안에 하트를 넣었어요. '오늘 기분을 말해요'라는 뜻이고, 앱의 게임 창(양피지 + 남색 테두리) 스타일을 그대로 썼어요.</p>
+      <div class="opt-main">
+        <div class="big" data-doan-id="d-big"><span class="fav" data-fav="d" data-s="256"></span><span class="grid-cap">16 × 16 · 꼬리는 왼쪽 아래</span></div>
+        <div class="opt-side">
+          <div><span class="label">실제 크기</span><div class="sizes" data-fav="d"></div></div>
+          <div><span class="label">홈 화면 아이콘</span>
+            <div class="home-row"><div class="home-wall"><div class="home" data-fav="d"></div><span>your mind</span></div>
+              <p class="hint">밤하늘 바탕 위에 크림색 말풍선이 떠서 홈 화면에서 대비가 가장 커요.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc">
+        <div><span class="label">좋은 점</span><ul class="pros">
+          <li>크림색이라 어두운 탭 바에서 가장 밝게 떠요</li>
+          <li>꼬리 덕에 흔한 하트 아이콘들과 구분돼요</li>
+        </ul></div>
+        <div><span class="label">고려할 점</span><ul class="cons">
+          <li>흰 탭 바에선 크림색이 바탕과 비슷해서 외곽선에 기대요</li>
+          <li>안의 하트가 8칸이라 작아요</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ E안 ═════════ -->
+  <section class="win opt" data-doan-frame="opt-e" data-doan-title="E안 · 기분 무지개 하트">
+    <div class="bar"><i class="gem" style="--c:#7ED9C3"></i>E안 · 기분 무지개 하트</div>
+    <div class="body">
+      <p class="concept">A안 하트 안을 기분 색 5가지로 칠했어요. 위에서부터 설레요 · 행복해요 · 평온해요 · 우울해요 · 피곤해요. '여러 기분을 담는 곳'이라는 뜻이에요.</p>
+      <div class="opt-main">
+        <div class="big" data-doan-id="e-big"><span class="fav" data-fav="e" data-s="256"></span><span class="grid-cap">16 × 16 · 띠 색은 MOODS 색 그대로</span></div>
+        <div class="opt-side">
+          <div><span class="label">실제 크기</span><div class="sizes" data-fav="e"></div></div>
+          <div><span class="label">홈 화면 아이콘</span>
+            <div class="home-row"><div class="home-wall"><div class="home" data-fav="e"></div><span>your mind</span></div>
+              <p class="hint">기분 고르기 화면의 색과 같아서 앱 안의 색 이야기와 이어져요.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc">
+        <div><span class="label">좋은 점</span><ul class="pros">
+          <li>A안처럼 또렷하면서 앱만의 색이 생겨요</li>
+          <li>다섯 안 중 탭에서 가장 화려해요</li>
+        </ul></div>
+        <div><span class="label">고려할 점</span><ul class="cons">
+          <li>무지개 하트는 널리 쓰이는 상징이라 다른 뜻으로 읽힐 수 있어요</li>
+          <li>로고(분홍 하트)와 색이 달라져요 → 로고도 바꿀지 정해야 해요</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 적용 메모 ═════════ -->
+  <section class="win opt apply" data-doan-frame="apply" data-doan-title="적용 메모 (C안)" data-doan-implements="scripts/favicon.mjs">
+    <div class="bar"><i class="gem" style="--c:#FFC94A"></i>적용 메모 — C안<span class="right"><span class="tag">npm run favicon</span></span></div>
+    <div class="body">
+      <h2>C안을 이렇게 넣었어요</h2>
+      <p class="hint"><b>scripts/favicon.mjs</b> 가 16칸 그리드 하나에서 아래 파일을 모두 뽑아요. SVG 는 앱의 <b>src/pixel/core.js</b> toSVG() 를 그대로 써요. 그림을 바꾸면 이 캔버스의 GRIDS.c 와 스크립트의 FACE 를 같이 맞춰주세요.</p>
+      <ul class="files">
+        <li><code>public/favicon.svg</code><span>16×16 픽셀 SVG (crispEdges). 크롬·엣지·파이어폭스 탭. 어떤 크기에서도 칸이 번지지 않아요.</span></li>
+        <li><code>public/favicon.ico</code><span>16·32·48px 묶음. SVG 파비콘을 못 쓰는 브라우저 대비용.</span></li>
+        <li><code>public/apple-touch-icon.png</code><span>180×180. 아이폰 홈 화면. 밤하늘 띠 바탕 위에 얼굴을 올려요. 가운데 정렬 · ×8 (얼굴 128px, 여백 26px).</span></li>
+      </ul>
+      <pre class="code"><span class="c">&lt;!-- index.html &lt;head&gt; (적용됨) --&gt;</span>
+&lt;link rel="icon" href="/favicon.ico" sizes="32x32" /&gt;
+&lt;link rel="icon" href="/favicon.svg" type="image/svg+xml" /&gt;
+&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png" /&gt;</pre>
+      <div class="note"><b>색</b>C안은 새 색 없이 C안 캐릭터 팔레트(핑크 머리 · 밝은 피부)와 밤하늘 남색만 써요.</div>
+      <div class="note"><b>더 해볼 수 있는 것</b>표정만 바꿔서 기분별 파비콘(오늘 고른 기분에 따라 탭 아이콘이 바뀜)으로 넓힐 수 있어요. 아직 코드에 없어요.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  // 글자 하나 = 픽셀 하나. '.' 은 투명.
+  const PAL = {
+    K: '#1A1838', P: '#FF7EB6', S: '#E0609E', W: '#FFFFFF',               // 외곽선 · 하트 · 그늘(새 색) · 하이라이트
+    1: '#211F4F', 2: '#2B2A63', 3: '#3A3778', 4: '#4E4590', 5: '#6A519E', // 밤하늘 띠 (--d1 ~ --d5)
+    G: '#FFC94A', g: '#FFE6A0',                                           // 금빛 반짝이
+    C: '#FFF6E3', c: '#E2CFA6',                                           // 양피지
+    H: '#F08DB5', h: '#FFC2DA', d: '#CF6593', F: '#FFE6D2', B: '#FF9EC4',  // 캐릭터: 핑크 머리 · 밝은 피부 · 볼터치
+    Y: '#FFD23F', T: '#7ED9C3', U: '#7AA7FF', V: '#B8A7E8',                // 기분 색: 행복 · 평온 · 우울 · 피곤
+  };
+  const GRIDS = {
+    a: [
+      '................', '................', '..KKKK....KKKK..', '.KPPPPK..KPPPPK.',
+      'KPWWPPPKKPPPPPPK', 'KPWPPPPPPPPPPPPK', 'KPPPPPPPPPPPPPSK', 'KPPPPPPPPPPPPPSK',
+      '.KPPPPPPPPPPPSK.', '..KPPPPPPPPPSK..', '...KPPPPPPPSK...', '....KPPPPPSK....',
+      '.....KPPPSK.....', '......KPSK......', '.......KK.......', '................',
+    ],
+    b: [
+      '.11111111111111.', '111111111111g111', '111W1111111gGg11', '222222222222g222',
+      '2222222222222222', '2222KKK22KKK2222', '333KPPPKKPPPK333', '333KPWPPPPPPK333',
+      '333KPPPPPPPSK333', '4W44KPPPPPSK4444', '44444KPPPSK44444', '444444KPSK444444',
+      '5555555KK55555g5', '5555555555555555', '5555555555555555', '.55555555555555.',
+    ],
+    c: [
+      '................', '.....KKKKKK.....', '...KKHHHHHHKK...', '..KHHhhHHHHHHK..',
+      '.KHhhHHHHHHHHdK.', 'KHhHHHHHHHHHHHdK', 'KHHFHHFFFFFFFHdK', 'KHHFFKFFFFKFFHdK',
+      'KHHFFKFFFFKFFHdK', 'KHHBBFFFFFFBBHdK', 'KHHFFFKFFKFFFHdK', 'KHHHFFFKKFFFHHdK',
+      'KHHHFFFFFFFFHHdK', 'KHHHKKKKKKKKHHdK', '.KKK........KKK.', '................',
+    ],
+    d: [
+      '................', '..KKKKKKKKKKKK..', '.KCCCCCCCCCCCCK.', 'KCCCCCCCCCCCCCcK',
+      'KCCCCPPCCPPCCCcK', 'KCCCPWPPPPPPCCcK', 'KCCCPPPPPPPPCCcK', 'KCCCCPPPPPSCCCcK',
+      'KCCCCCPPPSCCCCcK', 'KCCCCCCPSCCCCCcK', 'KCCCCCCCCCCCCCcK', '.KccccccccccccK.',
+      '..KcKKKKKKKKKK..', '..KcK...........', '.KcK............', '.KK.............',
+    ],
+    e: [
+      '................', '................', '..KKKK....KKKK..', '.KPPPPK..KPPPPK.',
+      'KPWWPPPKKPPPPPPK', 'KYWYYYYYYYYYYYYK', 'KYYYYYYYYYYYYYYK', 'KTTTTTTTTTTTTTTK',
+      '.KTTTTTTTTTTTTK.', '..KUUUUUUUUUUK..', '...KUUUUUUUUK...', '....KVVVVVVK....',
+      '.....KVVVVK.....', '......KVVK......', '.......KK.......', '................',
+    ],
+  };
+
+  // 같은 색이 이어지는 칸은 rect 하나로 묶어요 (src/pixel/core.js toSVG 와 같은 방식)
+  function svg(rows) {
+    let rects = '';
+    rows.forEach((row, y) => {
+      for (let x = 0; x < row.length;) {
+        const ch = row[x];
+        let run = 1;
+        while (row[x + run] === ch) run++;
+        if (ch !== '.') rects += `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${PAL[ch]}"/>`;
+        x += run;
+      }
+    });
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+  }
+  const art = (key, size) => `<span class="fav" style="width:${size}px;height:${size}px">${svg(GRIDS[key])}</span>`;
+
+  document.querySelectorAll('.fav[data-fav]').forEach(el => {
+    const s = Number(el.dataset.s) || 16;
+    el.style.width = el.style.height = s + 'px';
+    el.innerHTML = svg(GRIDS[el.dataset.fav]);
+  });
+
+  // 실제 크기: 16 · 32 · 48 · 64 를 밝은/어두운 바탕에
+  document.querySelectorAll('.sizes[data-fav]').forEach(el => {
+    const k = el.dataset.fav;
+    const row = cls => `<div class="sz-row ${cls}">${[16, 32, 48, 64].map(s => `<figure>${art(k, s)}<figcaption>${s}</figcaption></figure>`).join('')}</div>`;
+    el.innerHTML = row('light') + row('dark');
+  });
+
+  // 홈 화면: B안은 타일이 곧 아이콘, 나머지는 밤하늘 바탕 위에 올려요.
+  // data-tile · data-face 로 타일·얼굴 크기를 따로 줄 수 있어요 (C안은 실제 아이콘 비율 180:128 의 절반)
+  document.querySelectorAll('.home[data-fav]').forEach(el => {
+    const k = el.dataset.fav, tile = Number(el.dataset.tile) || 72;
+    const face = Number(el.dataset.face) || (k === 'b' ? tile : tile * 2 / 3);
+    el.style.width = el.style.height = tile + 'px';
+    el.style.borderRadius = Math.round(tile * 0.2237) + 'px';
+    el.innerHTML = art(k, face);
+  });
+})();
+</script>
+</body>
+</html>

@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "favicon": "node scripts/favicon.mjs"
   },
   "dependencies": {
     "galmuri": "^2.40.3",
