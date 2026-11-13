@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="doan:canvas" content="share-motion">
+<meta name="doan:width" content="4160">
+<title>your mind — 공유 & 모션 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+/* 색·컴포넌트는 mood-maker-c 캔버스(C안)와 같은 값이에요. (공유 토큰 CSS 파일이 없어 그대로 옮겨 왔어요) */
+:root{
+  --night:#1A1838; --d1:#211F4F; --d2:#2B2A63; --d3:#3A3778; --d4:#4E4590; --d5:#6A519E;
+  --band:#4B4796; --band-hi:#8E86D8;
+  --parch:#FFF6E3; --parch-2:#F6E8C8; --parch-3:#E2CFA6; --parch-4:#B79E72;
+  --ink:#2B2140; --ink-2:#5E5478; --ink-3:#8C83A3; --cream:#FFF6E3; --lilac:#CFC8F0;
+  --gold:#FFC94A; --gold-hi:#FFE6A0; --gold-lo:#C98A1E;
+  --indigo:#4B4FA0; --indigo-hi:#7A7FD0; --indigo-lo:#2F3270;
+  --pink:#FF7EB6; --pink-l:#FFD6E8; --mint:#7ED9C3; --red:#FF6B57;
+  --drop:rgba(10,8,30,.35);
+  --f:'Galmuri11', ui-monospace, monospace;
+  --f14:'Galmuri14', 'Galmuri11', ui-monospace, monospace;
+  /* 모션 변수 기본값 — 요소마다 인라인으로 덮어써요 (--t 는 위에서 아래로 상속돼야 해서 루트에만 둬요) */
+  --t:0s; --land-at:0s; --d:0s; --dx:0; --dy:0;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#E6E1EE; color:var(--ink); font-family:var(--f); -webkit-font-smoothing:none}
+button{font:inherit; color:inherit; border:0; background:none; padding:0; cursor:pointer}
+p{margin:0} h1,h2,h3{margin:0; font-weight:700} ol,ul,dl{margin:0; padding:0; list-style:none}
+code{font:11px/1 var(--f); background:var(--parch-2); color:var(--ink); padding:2px 5px; box-shadow:0 0 0 1px var(--parch-4); white-space:nowrap}
+
+/* ── 보드 ── */
+.board{width:4160px; padding:80px; display:grid; grid-template-columns:repeat(3, 1280px); gap:96px 80px; align-items:start}
+.board-head{grid-column:1 / -1; display:flex; justify-content:space-between; align-items:flex-end; gap:80px}
+.board-head h1{font:700 44px/1.3 var(--f)}
+.board-head p{font:14px/1.8 var(--f14); color:var(--ink-2)}
+.fcol{display:flex; flex-direction:column; gap:18px}
+.fcap{display:flex; align-items:center; gap:16px; font:14px/1.6 var(--f14); color:var(--ink-2)}
+.fcap .btn{flex:none}
+.phones{grid-column:1 / span 2; display:flex; justify-content:space-around; align-items:flex-start}
+.phone-col{width:375px; display:flex; flex-direction:column; gap:18px}
+.phone-col .fcap{flex-direction:column; align-items:flex-start; gap:10px}
+
+/* ── 프레임 · 하늘 ── */
+.frame{position:relative; overflow:hidden}
+.frame.d{width:1280px; height:800px}
+.frame.m{width:375px; height:812px}
+.sky{background:linear-gradient(var(--d1) 0 16%, var(--d2) 16% 38%, var(--d3) 38% 60%, var(--d4) 60% 82%, var(--d5) 82%)}
+.stars{position:absolute; left:0; top:0; width:2px; height:2px; pointer-events:none}
+.t-sky{color:var(--cream); text-shadow:3px 3px 0 var(--night)}
+.sub-sky{color:var(--lilac); font:14px/1.7 var(--f14)}
+.pad{position:relative; padding:44px 48px}
+
+/* ── 게임 창 ── */
+.win{position:relative; background:var(--parch);
+  box-shadow:inset 0 0 0 3px var(--parch-3), 0 0 0 3px var(--band), 0 0 0 6px var(--night), 0 12px 0 6px var(--drop)}
+.win > .bar{display:flex; align-items:center; gap:8px; height:40px; margin:3px 3px 0; padding:0 14px;
+  background:linear-gradient(var(--indigo-hi) 0 3px, var(--indigo) 3px); color:var(--cream);
+  font:700 14px/1 var(--f14); text-shadow:2px 2px 0 var(--night); box-shadow:0 3px 0 0 var(--night)}
+.win > .bar .right{margin-left:auto; display:flex; gap:10px; align-items:center}
+.win .body{padding:20px}
+
+/* ── 버튼 · 슬롯 · 작은 요소 ── */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; height:52px; padding:0 24px; white-space:nowrap;
+  font:700 22px/1 var(--f); color:var(--ink); background:var(--gold);
+  box-shadow:inset 3px 3px 0 var(--gold-hi), inset -3px -3px 0 var(--gold-lo), 0 0 0 3px var(--night), 0 6px 0 3px var(--drop)}
+.btn.indigo{background:var(--indigo); color:var(--cream); text-shadow:2px 2px 0 var(--night);
+  box-shadow:inset 3px 3px 0 var(--indigo-hi), inset -3px -3px 0 var(--indigo-lo), 0 0 0 3px var(--night), 0 6px 0 3px var(--drop)}
+.btn.parch{background:var(--parch); box-shadow:inset 3px 3px 0 #FFFFFF, inset -3px -3px 0 var(--parch-3), 0 0 0 3px var(--night), 0 6px 0 3px var(--drop)}
+.btn.sm{height:36px; padding:0 14px; font:14px/1 var(--f14); gap:8px; box-shadow:inset 2px 2px 0 var(--gold-hi), inset -2px -2px 0 var(--gold-lo), 0 0 0 2px var(--night)}
+.btn.parch.sm{box-shadow:inset 2px 2px 0 #FFFFFF, inset -2px -2px 0 var(--parch-3), 0 0 0 2px var(--night)}
+.btn.indigo.sm{box-shadow:inset 2px 2px 0 var(--indigo-hi), inset -2px -2px 0 var(--indigo-lo), 0 0 0 2px var(--night)}
+.btn.md{height:52px; padding:0 14px; font:700 14px/1 var(--f14); gap:8px}
+.btn.big{height:64px}
+.btn.block{width:100%}
+.slot{position:relative; display:flex; align-items:center; justify-content:center; background:var(--parch-2);
+  box-shadow:inset 2px 2px 0 var(--parch-3), inset -2px -2px 0 #FFFDF6, 0 0 0 2px var(--parch-4)}
+.gem{display:inline-block; flex:none; width:12px; height:12px; background:var(--c, var(--gold));
+  box-shadow:inset -2px -2px 0 rgba(0,0,0,.25), inset 2px 2px 0 rgba(255,255,255,.55), 0 0 0 2px var(--night)}
+.tag{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; font:11px/1 var(--f); background:var(--night); color:var(--cream); white-space:nowrap; text-shadow:none}
+.tag.gold{background:var(--gold); color:var(--ink); box-shadow:0 0 0 2px var(--night)}
+.tag.new{background:var(--pink); color:var(--night); font-weight:700; box-shadow:0 0 0 2px var(--night)}
+.hearts{display:inline-flex; gap:3px; align-items:center}
+.ic{display:inline-block; flex:none; vertical-align:middle}
+.ic svg,.px-art svg{display:block; width:100%; height:100%}
+.px-art{display:block; flex:none}
+.label{font:700 14px/1 var(--f14); color:var(--ink-2)}
+.note{position:relative; background:var(--gold-hi); box-shadow:0 0 0 2px var(--night); padding:12px 14px; font:14px/1.6 var(--f14); color:var(--ink)}
+.note b{display:block; margin-bottom:2px}
+.linkish{font:14px/1 var(--f14); color:var(--lilac); text-decoration:underline; text-underline-offset:4px}
+.seg{display:inline-flex; box-shadow:0 0 0 2px var(--night)}
+.seg > *{height:32px; padding:0 12px; display:flex; align-items:center; font:14px/1 var(--f14); background:var(--parch); color:var(--ink-2)}
+.seg > .on{background:var(--gold); color:var(--ink); font-weight:700}
+.toggle{display:inline-flex; align-items:center; gap:10px; font:14px/1 var(--f14); color:var(--cream)}
+.toggle .sw{width:40px; height:22px; background:var(--parch-3); box-shadow:0 0 0 2px var(--night); position:relative}
+.toggle .sw::after{content:''; position:absolute; top:3px; left:3px; width:16px; height:16px; background:var(--parch); box-shadow:0 0 0 2px var(--night)}
+.toggle.on .sw{background:var(--gold)}
+.toggle.on .sw::after{left:21px}
+.cap{font:11px/1.6 var(--f); color:var(--lilac)}
+.hl{color:var(--gold); font-weight:700}
+
+/* ── 상단 바 ── */
+.nav{position:relative; z-index:2; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 40px;
+  background:var(--night); box-shadow:0 3px 0 0 var(--band)}
+.logo{display:flex; align-items:center; gap:10px; font:700 22px/1 var(--f); color:var(--cream); text-shadow:2px 2px 0 #000}
+.date{font:14px/1 var(--f14); color:var(--lilac)}
+.steps{display:flex; align-items:center; font:14px/1 var(--f14); color:var(--ink-3)}
+.steps li{display:flex; align-items:center; gap:8px}
+.steps li + li::before{content:''; width:28px; height:3px; margin:0 12px; background:var(--band)}
+.steps li .gem{--c:var(--d4)}
+.steps li.on{color:var(--gold); font-weight:700} .steps li.on .gem{--c:var(--gold)}
+.steps li.done{color:var(--lilac)} .steps li.done .gem{--c:var(--mint)}
+
+/* ── 카드 (C안과 같음) ── */
+.card{position:absolute; left:104px; top:100px; width:360px; height:648px; display:flex; flex-direction:column; align-items:center; padding:22px 20px 18px}
+.card .top{width:100%; display:flex; justify-content:space-between; font:11px/1 var(--f); color:var(--ink-2); margin-bottom:14px}
+.card .slot{width:320px; height:320px}
+.card .mname{display:flex; align-items:center; gap:10px; font:700 33px/1 var(--f); margin:24px 0 12px}
+.speech{position:relative; margin-top:22px; padding:10px 14px; background:#FFFFFF; box-shadow:0 0 0 2px var(--night); font:14px/1.5 var(--f14)}
+.speech::before{content:''; position:absolute; top:-8px; left:50%; margin-left:-6px; width:12px; height:6px; background:var(--night); clip-path:polygon(50% 0, 100% 100%, 0 100%)}
+.card .foot{margin-top:auto; width:100%; display:flex; justify-content:space-between; align-items:center; font:700 14px/1 var(--f14)}
+
+/* ── 모바일 (C안과 같음) ── */
+.status{height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; font:700 14px/1 var(--f14); color:var(--cream)}
+.batt{width:26px; height:14px; box-shadow:0 0 0 2px var(--cream); position:relative; margin-right:4px}
+.batt::after{content:''; position:absolute; inset:3px 6px 3px 3px; background:var(--cream)}
+.m-head{height:52px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; font:14px/1 var(--f14); color:var(--lilac)}
+.m-head .logo{font:700 14px/1 var(--f14); gap:8px}
+.m-cta{position:absolute; left:0; right:0; bottom:0; padding:16px 20px 34px; background:var(--night); box-shadow:0 -3px 0 0 var(--band); display:flex; flex-direction:column; gap:10px; align-items:center}
+.m-card{position:absolute; left:52px; top:108px; width:271px; padding:14px 15px 14px; display:flex; flex-direction:column; align-items:center}
+.m-card .top{width:100%; display:flex; justify-content:space-between; font:11px/1 var(--f); color:var(--ink-2); margin-bottom:10px}
+.m-card .slot{width:240px; height:240px}
+.m-card .mname{display:flex; align-items:center; gap:8px; font:700 22px/1 var(--f); margin:16px 0 8px}
+.m-card .speech{font:11px/1.5 var(--f); padding:6px 10px; margin-top:14px}
+.m-share{position:absolute; left:20px; right:20px; top:548px; display:flex; justify-content:space-between}
+.m-share div{display:flex; flex-direction:column; align-items:center; gap:8px; font:11px/1 var(--f); color:var(--lilac); width:72px}
+.m-share .btn{width:52px; height:52px; padding:0}
+
+/* ═════════ 움직이는 스테이지 (.ast) ═════════
+   80×80 스테이지 = 배경+그림자 / 하체 / 상체(+깜빡) / 이펙트 4겹.
+   --u 는 스테이지 1칸. 이동은 언제나 --u 의 정수배, 타이밍은 step-end(뚝뚝 끊어서).
+   --t 는 '이 시점에서 멈춰 보기'용 (스토리보드). 실제 앱에선 0 이에요. */
+.ast{position:relative; display:block; width:100%; height:100%; overflow:hidden; cursor:pointer;
+  container-type:inline-size; --u:calc(100cqw / 80); --dl:calc(0s - var(--t, 0s))}
+.ast-bg,.ast-fx{position:absolute; inset:0}
+.ast-enter{position:absolute; left:20%; top:15%; width:60%; height:80%}
+.ast-poke,.ast-char,.ast-lower,.ast-upper,.ast-blink{position:absolute; inset:0}
+.ast-lower{clip-path:inset(73.4375% 0 0 0)}      /* 47행부터 아래: 다리·신발 (고정) */
+.ast-upper{clip-path:inset(0 0 26.5625% 0)}      /* 46행까지 위: 머리·몸통 (숨쉬기) */
+.ast-blink{opacity:0}
+.ast svg{display:block; width:100%; height:100%}
+.ast-fx{pointer-events:none}
+.fx{position:absolute; opacity:0}
+
+/* 공통: 숨쉬기 + 깜빡임 */
+.ast-upper{animation:breathe 1.6s step-end var(--dl) infinite}
+.ast-blink{animation:blink 3.2s step-end calc(var(--dl) - 1.3s) infinite}
+@keyframes breathe{0%{transform:none} 50%{transform:translateY(var(--u))}}
+@keyframes blink{0%{opacity:0} 91%{opacity:1} 95%{opacity:0}}
+
+/* 기분별 시그니처 모션 */
+.mo-happy .ast-char{animation:hop 2.4s step-end var(--dl) infinite}
+@keyframes hop{0%{transform:none} 68%{transform:translateY(calc(var(--u) * -2))} 73%{transform:translateY(calc(var(--u) * -4))} 80%{transform:translateY(calc(var(--u) * -3))} 86%{transform:translateY(calc(var(--u) * -1))} 90%{transform:none}}
+.mo-excited .ast-char{animation:sway 1.2s step-end var(--dl) infinite}
+@keyframes sway{0%{transform:none} 25%{transform:translateX(var(--u))} 50%{transform:none} 75%{transform:translateX(calc(var(--u) * -1))}}
+.mo-calm .ast-upper,.mo-custom .ast-upper{animation-duration:2.6s}
+.mo-tired .ast-upper{animation:nod 3.2s step-end var(--dl) infinite}
+@keyframes nod{0%{transform:none} 30%{transform:translateY(var(--u))} 45%{transform:translateY(calc(var(--u) * 2))} 84%{transform:translateY(calc(var(--u) * -1))} 88%{transform:none}}
+.mo-sad .ast-upper{animation:slump 2.8s step-end var(--dl) infinite}
+@keyframes slump{0%{transform:translateY(var(--u))} 50%{transform:translateY(calc(var(--u) * 2))}}
+.mo-angry .ast-char{animation:shake 2s step-end var(--dl) infinite}
+@keyframes shake{0%{transform:none} 70%{transform:translateX(var(--u))} 73%{transform:translateX(calc(var(--u) * -1))} 76%{transform:translateX(var(--u))} 79%{transform:translateX(calc(var(--u) * -1))} 82%{transform:translateX(var(--u))} 85%{transform:none}}
+.mo-blank .ast-upper{animation:none}
+.mo-blank .ast-char{animation:tilt 3.6s step-end var(--dl) infinite}
+@keyframes tilt{0%{transform:none} 55%{transform:translateX(var(--u))} 80%{transform:none}}
+
+/* 이펙트 */
+.fx.twinkle{animation:twinkle 2.4s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes twinkle{0%{opacity:0} 8%{opacity:1} 16%{opacity:0} 24%{opacity:1} 40%{opacity:0}}
+.fx.rise{animation:rise 2.1s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes rise{0%{opacity:0; transform:none} 6%{opacity:1} 20%{transform:translateY(calc(var(--u) * -1))} 35%{transform:translateY(calc(var(--u) * -2))} 50%{transform:translateY(calc(var(--u) * -3))} 65%{transform:translateY(calc(var(--u) * -4)); opacity:1} 78%{opacity:0}}
+.fx.float{animation:float 3.2s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes float{0%{opacity:0; transform:none} 5%{opacity:1} 25%{transform:translate(var(--u), calc(var(--u) * -1))} 50%{transform:translate(0, calc(var(--u) * -2))} 75%{transform:translate(var(--u), calc(var(--u) * -3)); opacity:1} 90%{opacity:0}}
+.fx.zz{animation:zz 3s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes zz{0%{opacity:0; transform:none} 5%{opacity:1} 20%{transform:translate(var(--u), calc(var(--u) * -2))} 40%{transform:translate(calc(var(--u) * 2), calc(var(--u) * -4))} 60%{transform:translate(calc(var(--u) * 3), calc(var(--u) * -6)); opacity:1} 75%{opacity:0}}
+.fx.hover{opacity:1; animation:hover 2.8s step-end var(--dl) infinite}
+@keyframes hover{0%{transform:none} 50%{transform:translateY(calc(var(--u) * -1))}}
+.fx.drip{animation:drip 1.4s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes drip{0%{opacity:1; transform:none} 25%{transform:translateY(var(--u))} 50%{transform:translateY(calc(var(--u) * 2))} 75%{transform:translateY(calc(var(--u) * 3)); opacity:0}}
+.fx.pulse{animation:pulse 2s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes pulse{0%{opacity:0} 66%{opacity:1} 74%{opacity:0} 78%{opacity:1} 92%{opacity:0}}
+.fx.puff{animation:puff 2s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes puff{0%{opacity:0; transform:none} 70%{opacity:1} 78%{transform:translateY(calc(var(--u) * -1))} 86%{transform:translateY(calc(var(--u) * -2))} 94%{opacity:0}}
+.fx.bubble{animation:bubbleK 3.6s step-end var(--dl) infinite}
+@keyframes bubbleK{0%{opacity:0} 10%{opacity:1} 88%{opacity:0}}
+.fx.dot1{animation:dot1 3.6s step-end var(--dl) infinite}
+.fx.dot2{animation:dot2 3.6s step-end var(--dl) infinite}
+.fx.dot3{animation:dot3 3.6s step-end var(--dl) infinite}
+@keyframes dot1{0%{opacity:0} 22%{opacity:1} 88%{opacity:0}}
+@keyframes dot2{0%{opacity:0} 34%{opacity:1} 88%{opacity:0}}
+@keyframes dot3{0%{opacity:0} 46%{opacity:1} 88%{opacity:0}}
+
+/* 등장: 착지 + 반짝 터짐 */
+.enter-land .ast-enter{animation:land .9s step-end calc(var(--land-at, 0s) + var(--dl)) both}
+@keyframes land{0%{opacity:0; transform:translateY(calc(var(--u) * -48))} 6%{opacity:1} 10%{transform:translateY(calc(var(--u) * -36))} 20%{transform:translateY(calc(var(--u) * -24))} 30%{transform:translateY(calc(var(--u) * -12))} 40%{transform:translateY(var(--u))} 50%{transform:translateY(calc(var(--u) * -3))} 62%{transform:translateY(calc(var(--u) * -1))} 72%{transform:none} 100%{opacity:1; transform:none}}
+.fx.burst{animation:burst .45s step-end calc(var(--land-at, 0s) + .36s + var(--dl)) both}
+@keyframes burst{0%{opacity:0; transform:none} 2%{opacity:1} 30%{transform:translate(calc(var(--u) * var(--dx) * .4), calc(var(--u) * var(--dy) * .4))} 60%{transform:translate(calc(var(--u) * var(--dx) * .8), calc(var(--u) * var(--dy) * .8))} 85%{opacity:0; transform:translate(calc(var(--u) * var(--dx)), calc(var(--u) * var(--dy)))} 100%{opacity:0}}
+.card-pop{animation:pop .3s step-end backwards}
+@keyframes pop{0%{opacity:0; transform:translateY(24px)} 33%{opacity:1; transform:translateY(12px)} 66%{transform:translateY(4px)} 100%{transform:none}}
+
+/* 탭 반응 (콕) */
+.ast-poke.on{animation:poke .5s step-end}
+@keyframes poke{0%{transform:translateY(calc(var(--u) * -2))} 20%{transform:translateY(calc(var(--u) * -4))} 45%{transform:translateY(calc(var(--u) * -3))} 65%{transform:translateY(calc(var(--u) * -1))} 80%{transform:none}}
+.fx.poke-heart.on{animation:rise 1s step-end}
+
+/* 레이어 분해 보기 */
+.only-bg .ast-enter,.only-bg .ast-fx{display:none}
+.only-lower .ast-bg,.only-lower .ast-upper,.only-lower .ast-fx{display:none}
+.only-upper .ast-bg,.only-upper .ast-lower,.only-upper .ast-fx{display:none}
+.only-fx .ast-bg,.only-fx .ast-enter{display:none}
+
+/* ═════════ 편지 도착 (.arr) ═════════ */
+.arr{position:absolute; inset:0; --u:4px; --dl:calc(0s - var(--t, 0s))}
+.arr-title{position:absolute; left:0; right:0; top:104px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center}
+.arr-title h1{font:700 22px/1.4 var(--f)}
+.swap{display:grid; justify-items:center}
+.swap > p{grid-area:1 / 1}
+.a-wait{opacity:0; animation:on 1.3s step-end var(--dl)}
+.a-done{animation:off 1.3s step-end var(--dl)}
+@keyframes on{0%,100%{opacity:1}}
+@keyframes off{0%,100%{opacity:0}}
+.arr .m-card{top:186px}
+.arr-card{animation:pop .3s step-end calc(1s + var(--dl)) backwards}
+.arr-cta{animation:pop .3s step-end calc(1.7s + var(--dl)) backwards}
+.arr-env{position:absolute; left:82px; top:251px; width:210px; height:180px; opacity:0; animation:env 1.3s step-end var(--dl); z-index:3}
+@keyframes env{0%{opacity:1; transform:translateY(-64px)} 7%{transform:translateY(-40px)} 14%{transform:translateY(-16px)} 21%{transform:translateY(4px)} 28%{transform:none} 33%{transform:translateX(-4px)} 38%{transform:translateX(4px)} 43%{transform:translateX(-4px)} 48%{transform:translateX(4px)} 53%{transform:none} 77%{transform:translateY(12px)} 83%{transform:translateY(32px)} 89%{transform:translateY(60px); opacity:1} 94%{opacity:0} 100%{opacity:0}}
+.env-c,.env-o{position:absolute; left:0; top:0}
+.env-c{opacity:0; animation:on .72s step-end var(--dl)}
+.env-o{animation:off .72s step-end var(--dl)}
+.arr-env .fx.burst{animation:burst .45s step-end calc(.72s + var(--dl)) both}
+
+/* 멈춰 보기 · 모션 줄이기 */
+.frozen,.frozen *{animation-play-state:paused !important; cursor:default}
+.rm .live,.rm .live *{animation:none !important}
+
+/* ═════════ 00 진단 ═════════ */
+.g-head h1{font:700 33px/1.3 var(--f); margin:12px 0 8px}
+.g-cols{display:grid; grid-template-columns:600px 1fr; gap:32px; margin-top:28px; align-items:start}
+.issues{padding:4px 20px 12px}
+.issues li{display:flex; gap:14px; padding:16px 0; border-bottom:2px dashed var(--parch-3)}
+.issues li:last-child{border-bottom:0}
+.sev{flex:none; width:64px; height:24px; display:inline-flex; align-items:center; justify-content:center; font:700 11px/1 var(--f); box-shadow:0 0 0 2px var(--night)}
+.sev.hi{background:var(--red); color:var(--cream)} .sev.mid{background:var(--gold)} .sev.lo{background:var(--parch-2)}
+.issues h3{font:700 14px/1.5 var(--f14); margin-bottom:4px}
+.issues p{font:14px/1.7 var(--f14); color:var(--ink-2)}
+.g-right{display:flex; flex-direction:column; gap:32px}
+.fix{padding:6px 20px 14px}
+.fix li{display:flex; gap:12px; padding:9px 0; align-items:flex-start}
+.fix li .ic{margin-top:4px}
+.fix b{display:block; font:700 14px/1.5 var(--f14)}
+.fix span{font:14px/1.6 var(--f14); color:var(--ink-2)}
+.ab{display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:16px 20px 4px}
+.opt{display:flex; flex-direction:column; gap:8px; padding:14px; background:var(--parch-2); box-shadow:inset -2px -2px 0 var(--parch-3), 0 0 0 2px var(--parch-4)}
+.opt .h{display:flex; align-items:center; gap:8px; font:700 14px/1.4 var(--f14)}
+.opt p{font:14px/1.6 var(--f14); color:var(--ink-2)}
+.opt .need{font:11px/1.6 var(--f); color:var(--ink-3)}
+.rec{display:flex; gap:10px; align-items:center; padding:14px 20px 18px; font:700 14px/1.5 var(--f14)}
+
+/* ═════════ 01 모션 가이드 ═════════ */
+.head-row{display:flex; justify-content:space-between; align-items:flex-end; gap:40px}
+.rules{display:grid; grid-template-columns:repeat(4, 1fr); gap:22px; margin-top:26px}
+.rule .body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px}
+.rule b{font:700 14px/1.4 var(--f14); display:flex; align-items:center; gap:8px}
+.rule p{font:14px/1.6 var(--f14); color:var(--ink-2)}
+.num{flex:none; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; background:var(--night); color:var(--cream); font:11px/1 var(--f)}
+.mgrid{display:grid; grid-template-columns:repeat(4, 1fr); gap:30px 22px; margin-top:34px}
+.mtile .body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:12px}
+.mtile .slot{width:240px; height:240px; align-self:center}
+.spec{display:grid; grid-template-columns:44px 1fr; gap:5px 8px; font:11px/1.5 var(--f); color:var(--ink)}
+.spec dt{color:var(--ink-3)}
+.spec dd{margin:0}
+.lay-row{display:grid; grid-template-columns:1fr 330px; gap:22px; margin-top:34px}
+.layers .body{display:flex; align-items:flex-start; justify-content:space-between; padding:18px 18px 16px}
+.layer{display:flex; flex-direction:column; align-items:center; gap:8px; font:11px/1.5 var(--f); color:var(--ink-2); text-align:center; width:136px}
+.layer .slot{width:136px; height:136px}
+.layer b{font:700 11px/1 var(--f); color:var(--ink)}
+.op{align-self:center; margin-top:-34px; font:700 22px/1 var(--f); color:var(--ink-3)}
+.blinks .body{display:flex; gap:16px; justify-content:center; padding:18px 16px 16px}
+
+/* ═════════ 02 스토리보드 ═════════ */
+.sb .body{padding:18px 20px 20px}
+.sb-row{display:flex; gap:16px; align-items:flex-start}
+.sb-step{display:flex; flex-direction:column; gap:8px; align-items:center; font:11px/1.5 var(--f); color:var(--ink-2); text-align:center; width:160px}
+.sb-step .slot{width:160px; height:160px}
+.sb-step > b{font:700 11px/1 var(--f); color:var(--ink); background:var(--gold); padding:5px 7px; box-shadow:0 0 0 2px var(--night)}
+.sb-step.wide{width:188px}
+.sb-live{margin-left:auto; display:flex; flex-direction:column; gap:12px; align-items:center; font:11px/1.5 var(--f); color:var(--ink-2)}
+.sb-live .slot{width:200px; height:200px}
+.tp{position:relative; width:188px; height:406px; overflow:hidden; box-shadow:0 0 0 3px var(--night)}
+.tp-in{position:absolute; left:0; top:0; width:375px; height:812px; transform:scale(.5); transform-origin:0 0}
+.sb-spec{margin-top:18px; display:grid; grid-template-columns:repeat(2, 1fr); gap:6px 28px; font:14px/1.6 var(--f14); color:var(--ink-2)}
+.sb-spec li{display:flex; gap:8px}
+.sb-spec li b{flex:none; color:var(--ink)}
+
+/* ═════════ 03 · 04 데스크톱 ═════════ */
+.share-side{position:absolute; left:536px; top:96px; width:664px}
+.share-side h1{font:700 33px/1.35 var(--f); margin:12px 0 8px}
+.send{position:relative; margin-top:22px; display:flex; flex-direction:column; gap:10px}
+.newtag{position:absolute; z-index:4}
+.btn.soon{position:relative; color:var(--ink-3); background:var(--parch-2)}
+.btn.soon .ic{opacity:.45}
+.soon-tag{position:absolute; top:-12px; right:-10px; height:20px; padding:0 6px; font-size:11px}
+.ratio-row{display:flex; align-items:center; gap:14px; margin-top:26px}
+.ratio-row .lbl{font:14px/1 var(--f14); color:var(--lilac)}
+.share-row{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; margin-top:16px}
+.friend-pv{margin-top:30px}
+.friend-pv .body{display:flex; gap:16px; padding:14px 16px; align-items:center}
+.share-more{display:flex; gap:24px; align-items:center; margin-top:24px}
+.poke-tip{position:absolute; z-index:4; display:flex; align-items:center; gap:6px; height:30px; padding:0 10px; background:var(--parch); box-shadow:0 0 0 2px var(--night), inset -2px -2px 0 var(--parch-3); font:700 11px/1 var(--f); white-space:nowrap}
+.poke-tip::after{content:''; position:absolute; left:-8px; top:50%; margin-top:-5px; width:6px; height:10px; background:var(--night); clip-path:polygon(100% 0, 100% 100%, 0 50%)}
+.view-left{position:absolute; left:120px; top:150px; width:560px; display:flex; flex-direction:column; align-items:flex-start; gap:14px}
+.view-left h1{font:700 44px/1.3 var(--f)}
+.view-cta{display:flex; align-items:center; gap:28px; margin-top:16px}
+
+/* ═════════ 05 미리보기 ═════════ */
+.pv-cols{display:grid; grid-template-columns:repeat(3, 360px); justify-content:space-between; margin-top:28px}
+.pv-h{display:flex; align-items:center; gap:10px; margin-bottom:16px; font:700 14px/1 var(--f14); color:var(--cream)}
+.chat{width:360px; height:580px; background:#D9D4EA; box-shadow:0 0 0 3px var(--night), 0 12px 0 3px var(--drop); position:relative; overflow:hidden; display:flex; flex-direction:column}
+.chat-top{height:44px; flex:none; display:flex; align-items:center; gap:10px; padding:0 14px; background:#C9C2E0; font:700 14px/1 var(--f14); color:var(--ink); box-shadow:0 2px 0 0 #B5ADD3}
+.chat-body{flex:1; padding:18px 14px; display:flex; flex-direction:column; gap:10px; align-items:flex-end}
+.msg{max-width:262px; padding:9px 12px; background:var(--gold-hi); box-shadow:0 0 0 2px var(--night); font:14px/1.5 var(--f14); word-break:break-all}
+.msg .url{color:#3A4FB0; text-decoration:underline}
+.lp{width:262px; background:#FFFFFF; box-shadow:0 0 0 2px var(--night)}
+.lp .img{position:relative; height:143px; overflow:hidden; background:var(--parch-2); display:flex; align-items:center; justify-content:center; font:11px/1 var(--f); color:var(--ink-3); box-shadow:0 2px 0 0 var(--parch-3)}
+.lp .img.empty{height:72px; background:repeating-linear-gradient(45deg, #F1ECF7 0 6px, #E8E2F0 6px 12px)}
+.lp .img > .og-img{position:absolute; left:0; top:0; transform:scale(.5458); transform-origin:0 0}
+.lp .txt{padding:10px 12px; font:14px/1.5 var(--f14)}
+.lp .txt b{display:block}
+.lp .txt span{display:block; margin-top:2px; font:11px/1.4 var(--f); color:var(--ink-3)}
+.lp .btns{display:grid; grid-template-columns:1fr 1fr; box-shadow:0 -2px 0 0 var(--parch-3)}
+.lp .btns span{height:40px; display:flex; align-items:center; justify-content:center; font:700 14px/1 var(--f14)}
+.lp .btns span + span{box-shadow:-2px 0 0 0 var(--parch-3)}
+.photo{width:156px; padding:10px 10px 12px; background:var(--parch); box-shadow:inset 0 0 0 2px var(--parch-3), 0 0 0 2px var(--night); display:flex; flex-direction:column; align-items:center; gap:8px}
+.photo .t{width:100%; display:flex; justify-content:space-between; font:11px/1 var(--f); color:var(--ink-2); transform:scale(.8); transform-origin:center}
+.photo .n{display:flex; align-items:center; gap:6px; font:700 14px/1 var(--f14)}
+.time{font:11px/1 var(--f); color:var(--ink-3)}
+.verdict{margin-top:22px; display:flex; flex-direction:column; gap:8px; font:14px/1.6 var(--f14); color:var(--cream)}
+.verdict li{display:flex; gap:10px; align-items:flex-start}
+.verdict li .ic{margin-top:4px}
+.og-row{display:grid; grid-template-columns:repeat(2, 480px); gap:40px; margin-top:44px; justify-content:start; align-items:start}
+.og-box{display:flex; flex-direction:column; gap:12px}
+.og-box .lbl{display:flex; align-items:center; gap:10px; font:700 14px/1 var(--f14); color:var(--cream)}
+.og-img{position:relative; width:480px; height:252px; overflow:hidden; box-shadow:0 0 0 3px var(--night)}
+.og-default .og-t{position:absolute; left:0; right:0; top:28px; display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center}
+.og-default .og-t b{font:700 22px/1.3 var(--f); color:var(--cream); text-shadow:2px 2px 0 var(--night)}
+.og-default .px-art{position:absolute; left:0; bottom:0}
+.og-card{display:flex; align-items:center; gap:18px; padding:0 22px; background:var(--parch)}
+.og-card .slot{width:192px; height:192px; flex:none}
+.og-r{display:flex; flex-direction:column; align-items:flex-start; gap:10px; white-space:nowrap}
+.og-r .k{font:11px/1 var(--f); color:var(--ink-2)}
+.og-r .n{display:flex; align-items:center; gap:10px; font:700 33px/1 var(--f)}
+.og-r .speech{margin-top:8px; font:11px/1.5 var(--f); padding:7px 10px}
+.og-r .speech::before{left:22px}
+.og-r .brand{display:flex; align-items:center; gap:8px; margin-top:6px; font:700 14px/1 var(--f14)}
+.og-r .brand small{font:11px/1 var(--f); color:var(--ink-2)}
+
+/* ═════════ M3 깨진 링크 ═════════ */
+.broken-title{position:absolute; left:0; right:0; top:120px; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center}
+.broken-title h1{font:700 22px/1.4 var(--f)}
+
+/* ═════════ 06 구현 메모 ═════════ */
+.impl{margin-top:26px}
+.impl .body{padding:6px 20px 12px}
+.impl li{display:grid; grid-template-columns:62px 330px 1fr; gap:16px; align-items:start; padding:12px 0; border-bottom:2px dashed var(--parch-3); font:14px/1.6 var(--f14); color:var(--ink-2)}
+.impl li:last-child{border-bottom:0}
+.impl li > code{justify-self:start; white-space:normal; line-height:1.6}
+</style>
+</head>
+<body>
+<main class="board">
+
+  <header class="board-head">
+    <div>
+      <h1>your mind · 공유 & 모션 시안</h1>
+      <p>공유하면 친구가 캐릭터를 바로 보고, 완성·공유받은 캐릭터가 움직이게 · 시안 v0.1 · 2026.11.13</p>
+    </div>
+    <p style="text-align:right"><span class="tag gold">구현됨</span> 03·04·M1~M3 화면과 모션은 코드에 반영했어요 (<code>src/screens/Share.tsx</code> · <code>CardView.tsx</code> · <code>server/</code>). 2단계는 B(미리보기 서버)로 진행했어요.<br>
+    캐릭터를 콕 눌러보세요 — 반응해요. 「01 모션 가이드」의 <b>모션 줄이기</b> 스위치로 캔버스 전체를 정지 화면으로 볼 수 있어요.</p>
+  </header>
+
+  <!-- ═════════ 00 진단 & 가이드 ═════════ -->
+  <section class="frame sky" style="width:1280px; height:1180px" data-doan-frame="sm-guide" data-doan-title="00 공유 진단 & 개선 가이드">
+    <div class="stars" data-n="40" data-h="200"></div>
+    <div class="pad">
+      <div class="g-head">
+        <span class="tag gold">진단</span>
+        <h1 class="t-sky">공유가 '잘 안 되는' 이유</h1>
+        <p class="sub-sky">지금 코드(<code>src/app/link.ts</code> · <code>src/screens/Share.tsx</code> · <code>index.html</code>)를 읽고 찾은 거예요. 「확인」 표시는 실제 휴대폰에서 한 번 더 봐야 해요.</p>
+      </div>
+      <div class="g-cols">
+        <div class="win" data-doan-id="sm-issues">
+          <div class="bar"><i class="gem" style="--c:#FF6B57"></i>지금 무엇이 안 되나</div>
+          <ol class="issues">
+            <li><b class="sev hi">핵심</b><div><h3>링크 미리보기에 캐릭터가 없어요</h3><p>공유 링크가 <code>#/card/&lt;코드&gt;</code> 해시 방식이에요. 메신저가 미리보기를 만들 때 <b>#&nbsp;뒤는 서버로 가지 않아서</b> 카드마다 다른 그림을 줄 수 없어요. 게다가 index.html에 og:image가 없어 제목만 나오거나 비어 있어요. (C안 시안의 '링크 미리보기 예시'는 아직 구현 전)</p></div></li>
+            <li><b class="sev hi">핵심</b><div><h3>카카오톡 버튼은 글+링크만 보내요</h3><p>공유 시트에 이미지 파일이 들어가지 않아서 채팅방에서는 캐릭터가 보이지 않아요. 친구가 링크를 눌러야만 볼 수 있어요.</p></div></li>
+            <li><b class="sev mid">확인</b><div><h3>인스타 스토리가 실패할 수 있어요</h3><p>탭 → 이미지 만들기(폰트 로딩 + 캔버스, 기다림) → 공유 시트 순서예요. iOS Safari는 탭 직후가 아니면 공유를 막을 수 있어서 '앗, 잠깐 문제가 생겼어요'가 뜰 수 있어요.</p></div></li>
+            <li><b class="sev mid">환경</b><div><h3>HTTPS가 아니면 공유·복사가 꺼져요</h3><p>휴대폰에서 <code>http://192.168…:5173</code>으로 열면 공유 시트와 클립보드를 쓸 수 없어 '복사하지 못했어요'로 끝나요. 개발 서버에서 복사한 링크는 <code>localhost</code>라 친구가 열 수 없어요. 저장소에 아직 배포 설정이 없어요.</p></div></li>
+            <li><b class="sev lo">작음</b><div><h3>링크가 너무 길어요 (약 500자)</h3><p>캐릭터 값 15개를 JSON + base64로 통째로 담아서, 채팅창에 긴 문자열로 보여요.</p></div></li>
+          </ol>
+        </div>
+        <div class="g-right">
+          <div class="win" data-doan-id="sm-step1">
+            <div class="bar"><i class="gem" style="--c:#7ED9C3"></i>1단계 · 서버 없이 지금 바로<span class="right"><span class="tag">먼저 추천</span></span></div>
+            <ul class="fix">
+              <li><i class="ic" data-icon="check" data-scale="2"></i><div><b>카드 이미지 + 링크를 같이 보내기</b><span>공유 시트에 PNG 파일과 링크를 함께 넣어요. 파일을 못 받는 앱이면 링크만 보내요.</span></div></li>
+              <li><i class="ic" data-icon="check" data-scale="2"></i><div><b>이미지는 미리 만들어 두기</b><span>공유 화면에 들어오면 바로 그려 두고, 탭하면 기다림 없이 공유 시트를 열어요. (iOS 차단 해결)</span></div></li>
+              <li><i class="ic" data-icon="check" data-scale="2"></i><div><b>짧은 링크</b><span>값 대신 목록 번호로 담아 <code>#/c/2f3a9k…</code> 40자 안팎. 예전 <code>#/card/</code> 링크도 계속 열려요.</span></div></li>
+              <li><i class="ic" data-icon="check" data-scale="2"></i><div><b>기본 미리보기 태그</b><span>og:title · og:description · og:image(대표 그림 1장) → 적어도 그림이 있는 미리보기</span></div></li>
+              <li><i class="ic" data-icon="check" data-scale="2"></i><div><b>받는 화면: 편지 도착 연출 + 움직이는 캐릭터</b><span>01 · 02 프레임과 M2를 참고해요.</span></div></li>
+            </ul>
+          </div>
+          <div class="win" data-doan-id="sm-step2">
+            <div class="bar"><i class="gem" style="--c:#FFC94A"></i>2단계 · 카드마다 다른 미리보기<span class="right"><span class="tag">배포 필요</span></span></div>
+            <div class="ab">
+              <div class="opt"><span class="h"><span class="tag gold">A</span>카카오 공유 SDK</span><p>카드 이미지를 카카오에 올리고 피드 메시지로 보내요. 말풍선에 캐릭터 + [카드 보기] [나도 만들기] 버튼.</p><p class="need">필요: 카카오 디벨로퍼스 앱 키 · 사이트 도메인 등록 · 카톡 전용</p></div>
+              <div class="opt"><span class="h"><span class="tag gold">B</span>미리보기 서버 (엣지 함수)</span><p>링크를 <code>/c/&lt;코드&gt;</code> 경로로 바꾸고, 함수가 카드별 og:image를 그려줘요. 카톡 · iMessage · DM · 슬랙 어디서나.</p><p class="need">필요: Vercel · Cloudflare 같은 함수 호스팅 (GitHub Pages는 불가)</p></div>
+            </div>
+            <p class="rec"><i class="ic" data-icon="star" data-c="#FFC94A" data-scale="2"></i>추천: 1단계 → B. 카톡 버튼 체감을 더 올리고 싶으면 A를 더해요.</p>
+          </div>
+          <div class="note" data-doan-id="sm-decide"><b>정한 것 (2026.11.13)</b>① Coolify에 배포 → 2단계 <b>B 미리보기 서버</b>로 진행 ② 인스타 스토리는 <b>Coming soon</b>, 카카오톡 · 링크 공유 먼저 ③ 남은 것: 카카오 SDK(A)는 앱 키가 생기면 · 받는 화면 이름 표시</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 01 모션 가이드 ═════════ -->
+  <section class="frame sky" style="width:1280px; height:1540px" data-doan-frame="sm-motion" data-doan-title="01 모션 가이드 · 기분별 움직임">
+    <div class="stars" data-n="40" data-h="200"></div>
+    <div class="pad">
+      <div class="head-row">
+        <div class="g-head">
+          <span class="tag gold">모션</span>
+          <h1 class="t-sky">캐릭터가 움직이는 규칙</h1>
+          <p class="sub-sky">모든 캐릭터는 숨쉬기 + 눈 깜빡임을 하고, 그 위에 기분마다 시그니처 모션이 하나씩 붙어요. 캐릭터를 누르면 폴짝 반응해요.</p>
+        </div>
+        <button class="toggle rm-toggle" type="button" data-doan-id="sm-rm-toggle"><span class="sw"></span>모션 줄이기로 보기 (캔버스 전체)</button>
+      </div>
+
+      <div class="rules">
+        <div class="win rule"><div class="body"><b><i class="num">1</i>1칸씩, 끊어서</b><p>이동은 언제나 스테이지 1칸(80×80 격자) 단위. 부드럽게 미끄러지지 않고 뚝뚝 — 픽셀이 번지지 않아요.</p></div></div>
+        <div class="win rule"><div class="body"><b><i class="num">2</i>그림자는 바닥에</b><p>배경+그림자 / 하체 / 상체 / 이펙트 4겹. 점프해도 그림자는 남고, 숨쉴 땐 상체만 1칸 내려가요.</p></div></div>
+        <div class="win rule"><div class="body"><b><i class="num">3</i>기본 + 기분 하나</b><p>숨쉬기 1.6초 · 깜빡임 3.2초마다 0.13초는 공통. 기분 모션은 하나만, 2~4초 주기로 은은하게.</p></div></div>
+        <div class="win rule"><div class="body"><b><i class="num">4</i>모션 줄이기 존중</b><p>기기에서 '동작 줄이기'를 켰다면 정지 그림, 등장 연출은 생략. 저장 이미지(PNG)는 늘 정지 컷이에요.</p></div></div>
+      </div>
+
+      <div class="mgrid">
+        <div class="win mtile" data-doan-id="sm-mo-happy"><div class="bar"><i class="gem" style="--c:#FFD23F"></i>행복해요<span class="right"><span class="tag">폴짝</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="m" data-c-mood="happy" data-label="행복해요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>2.4초마다 4칸 점프 → 착지</dd><dt>이펙트</dt><dd>반짝이 3개가 번갈아 깜빡</dd><dt>주기</dt><dd>2.4s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-excited"><div class="bar"><i class="gem" style="--c:#FF7EB6"></i>설레요<span class="right"><span class="tag">두근두근</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="f" data-c-mood="excited" data-label="설레요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>좌우로 1칸씩 살랑</dd><dt>이펙트</dt><dd>하트 3개가 머리 위로 뿅</dd><dt>주기</dt><dd>1.2s · 하트 2.1s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-calm"><div class="bar"><i class="gem" style="--c:#7ED9C3"></i>평온해요<span class="right"><span class="tag">느긋</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="f" data-c-mood="calm" data-c-hair="long" data-c-hair-color="blonde" data-c-top="knit" data-c-bottom="skirt" data-c-shoes="loafers" data-c-acc="glasses" data-label="평온해요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>숨쉬기만, 느리게</dd><dt>이펙트</dt><dd>음표가 천천히 떠올라요</dd><dt>주기</dt><dd>2.6s · 음표 3.2s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-tired"><div class="bar"><i class="gem" style="--c:#B8A7E8"></i>피곤해요<span class="right"><span class="tag">꾸벅</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="f" data-c-mood="tired" data-c-hair="bob" data-c-hair-color="pink" data-c-top="pajama" data-c-bottom="pjpants" data-c-shoes="slippers" data-c-acc="beanie" data-label="피곤해요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>상체가 2칸 꾸벅 → 화들짝</dd><dt>이펙트</dt><dd>Z가 비스듬히 떠올라요</dd><dt>주기</dt><dd>3.2s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-sad"><div class="bar"><i class="gem" style="--c:#7AA7FF"></i>우울해요<span class="right"><span class="tag">축</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="m" data-c-mood="sad" data-c-hair="dandy" data-c-hair-color="black" data-c-top="hoodie" data-c-shoes="boots" data-c-acc="phones" data-label="우울해요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>1칸 처진 채 느린 숨</dd><dt>이펙트</dt><dd>머리 위 먹구름 + 빗방울</dd><dt>주기</dt><dd>2.8s · 비 1.4s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-angry"><div class="bar"><i class="gem" style="--c:#FF6B57"></i>화나요<span class="right"><span class="tag">부들부들</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="m" data-c-mood="angry" data-c-hair="wolf" data-label="화나요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>2초마다 0.3초 좌우 떨림</dd><dt>이펙트</dt><dd>빨간 화남 표시 + 김 두 줄기</dd><dt>주기</dt><dd>2.0s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-blank"><div class="bar"><i class="gem" style="--c:#C9CDD6"></i>멍해요<span class="right"><span class="tag">멍—</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="f" data-c-mood="blank" data-c-hair="bun" data-c-top="stripe" data-label="멍해요 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>숨쉬기 없음, 가끔 1칸 갸웃</dd><dt>이펙트</dt><dd>말풍선에 점이 하나씩 …</dd><dt>주기</dt><dd>3.6s</dd></dl></div></div>
+        <div class="win mtile" data-doan-id="sm-mo-custom"><div class="bar"><i class="gem" style="--c:#C9CDD6"></i>직접 쓰기<span class="right"><span class="tag">포근</span></span></div>
+          <div class="body"><span class="slot"><span data-ast data-c-gender="m" data-c-mood="custom" data-c-hair="curly" data-label="직접 쓴 기분 캐릭터"></span></span>
+          <dl class="spec"><dt>캐릭터</dt><dd>평온해요와 같아요</dd><dt>이펙트</dt><dd>음표 (기분 이름은 카드에)</dd><dt>주기</dt><dd>2.6s</dd></dl></div></div>
+      </div>
+
+      <div class="lay-row">
+        <div class="win layers" data-doan-id="sm-layers">
+          <div class="bar"><i class="gem"></i>레이어 분해 · 4겹이 겹쳐서 한 장면<span class="right"><span class="tag gold">상체 0~46행 / 하체 47~63행</span></span></div>
+          <div class="body">
+            <div class="layer"><span class="slot"><span data-ast data-only="bg" data-c-gender="f" data-c-mood="excited"></span></span><b>배경 + 그림자</b>고정</div>
+            <span class="op">+</span>
+            <div class="layer"><span class="slot"><span data-ast data-only="lower" data-c-gender="f" data-c-mood="excited"></span></span><b>하체</b>다리·신발 고정</div>
+            <span class="op">+</span>
+            <div class="layer"><span class="slot"><span data-ast data-only="upper" data-c-gender="f" data-c-mood="excited"></span></span><b>상체 + 깜빡</b>숨쉬기 1칸</div>
+            <span class="op">+</span>
+            <div class="layer"><span class="slot"><span data-ast data-only="fx" data-c-gender="f" data-c-mood="excited"></span></span><b>이펙트</b>하트·Z·구름…</div>
+            <span class="op">=</span>
+            <div class="layer"><span class="slot"><span data-ast data-c-gender="f" data-c-mood="excited"></span></span><b>완성</b>기분 모션 포함</div>
+          </div>
+        </div>
+        <div class="win blinks" data-doan-id="sm-blink">
+          <div class="bar"><i class="gem"></i>깜빡임 프레임</div>
+          <div class="body">
+            <div class="layer" style="width:auto"><span class="slot" style="width:100px; height:110px"><span class="px-art" data-blink-demo="open" data-c-gender="f" data-c-mood="calm" data-scale="2.5"></span></span><b>뜬 눈</b>평소</div>
+            <div class="layer" style="width:auto"><span class="slot" style="width:100px; height:110px"><span class="px-art" data-blink-demo="closed" data-c-gender="f" data-c-mood="calm" data-scale="2.5"></span></span><b>감은 눈</b>0.13초</div>
+          </div>
+          <p class="cap" style="color:var(--ink-2); padding:0 18px 16px">눈을 뜬 표정에만 붙어요. 방긋·깔깔·하품처럼 이미 감은 표정은 깜빡이지 않아요. 감은 눈 그림은 새로 그려야 해요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 02 등장 연출 ═════════ -->
+  <section class="frame sky" style="width:1280px; height:1400px" data-doan-frame="sm-entrance" data-doan-title="02 등장 연출 · 완성 & 도착">
+    <div class="stars" data-n="40" data-h="200"></div>
+    <div class="pad">
+      <div class="g-head">
+        <span class="tag gold">등장</span>
+        <h1 class="t-sky">처음 보는 순간을 한 번 더 기쁘게</h1>
+        <p class="sub-sky">아래 칸들은 같은 애니메이션을 그 시각에 멈춰 둔 거예요. 오른쪽(과 M2)에서 실제로 재생해볼 수 있어요.</p>
+      </div>
+
+      <div class="win sb" style="margin-top:28px" data-doan-id="sm-sb-land">
+        <div class="bar"><i class="gem" style="--c:#FFC94A"></i>완성했을 때 · 착지<span class="right"><span class="tag">0.9초 · 한 번만</span></span></div>
+        <div class="body">
+          <div class="sb-row">
+            <div class="sb-step"><b>0.10s</b><span class="slot"><span data-ast data-t="0.1" data-enter="land" data-c-gender="f" data-c-mood="excited"></span></span>위에서 떨어져요</div>
+            <div class="sb-step"><b>0.25s</b><span class="slot"><span data-ast data-t="0.25" data-enter="land" data-c-gender="f" data-c-mood="excited"></span></span>12칸씩 뚝뚝</div>
+            <div class="sb-step"><b>0.38s</b><span class="slot"><span data-ast data-t="0.38" data-enter="land" data-c-gender="f" data-c-mood="excited"></span></span>착지 · 1칸 눌림</div>
+            <div class="sb-step"><b>0.55s</b><span class="slot"><span data-ast data-t="0.55" data-enter="land" data-c-gender="f" data-c-mood="excited"></span></span>통 튀며 반짝 8개</div>
+            <div class="sb-step"><b>1.40s</b><span class="slot"><span data-ast data-t="1.4" data-enter="land" data-c-gender="f" data-c-mood="excited"></span></span>기분 모션 시작</div>
+            <div class="sb-live">
+              <span class="slot"><span data-ast id="sb-live-land" data-enter="land" data-land-at="0.2" data-c-gender="f" data-c-mood="excited" data-label="착지 연출 미리보기"></span></span>
+              <button class="btn sm" type="button" data-replay="#sb-live-land"><i class="ic" data-icon="reset" data-scale="2"></i>다시 보기</button>
+            </div>
+          </div>
+          <ul class="sb-spec">
+            <li><b>카드</b>0.3초 동안 아래에서 3칸 튀어 올라요</li>
+            <li><b>캐릭터</b>0.3초에 48칸 위에서 떨어지기 시작 → 0.36초 뒤 착지</li>
+            <li><b>반짝</b>땅에 닿는 순간 8방향으로 퍼지고 사라져요</li>
+            <li><b>다시 보기</b>캐릭터를 누르면 폴짝 (착지는 다시 안 해요)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="win sb" style="margin-top:36px" data-doan-id="sm-sb-arrive">
+        <div class="bar"><i class="gem" style="--c:#FF7EB6"></i>친구 링크를 열었을 때 · 편지 도착<span class="right"><span class="tag">2.1초 · 누르면 건너뛰기</span></span></div>
+        <div class="body">
+          <div class="sb-row" style="justify-content:space-between">
+            <div class="sb-step wide"><b>0.10s</b><div class="tp"><div class="tp-in sky" data-arrive data-t="0.1"></div></div>봉투가 툭 떨어져요</div>
+            <div class="sb-step wide"><b>0.50s</b><div class="tp"><div class="tp-in sky" data-arrive data-t="0.5"></div></div>두근두근 흔들</div>
+            <div class="sb-step wide"><b>0.80s</b><div class="tp"><div class="tp-in sky" data-arrive data-t="0.8"></div></div>열리면서 반짝</div>
+            <div class="sb-step wide"><b>1.15s</b><div class="tp"><div class="tp-in sky" data-arrive data-t="1.15"></div></div>봉투는 아래로, 카드는 위로</div>
+            <div class="sb-step wide"><b>2.40s</b><div class="tp"><div class="tp-in sky" data-arrive data-t="2.4"></div></div>캐릭터 착지 → 기분 모션</div>
+          </div>
+          <ul class="sb-spec">
+            <li><b>0.0–0.4s</b>봉투가 4번 끊어 떨어지고 1칸 튕겨요</li>
+            <li><b>1.0–1.3s</b>봉투는 내려가며 사라지고 카드가 올라와요</li>
+            <li><b>0.4–0.7s</b>좌우로 흔들 · 문구 '봉투를 여는 중…'</li>
+            <li><b>1.3–2.2s</b>캐릭터 착지 · 1.7s '나도 만들기' 등장</li>
+            <li><b>0.7s</b>뚜껑이 열리고 반짝이 퍼져요</li>
+            <li><b>건너뛰기</b>화면 아무 데나 누르면 마지막 장면으로</li>
+          </ul>
+          <p class="cap" style="color:var(--ink-2); margin-top:12px">제안: 같은 링크를 다시 열 땐(같은 탭 세션) 연출을 생략해요. 동작 줄이기를 켠 기기는 처음부터 카드가 보여요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 03 완성 & 공유 (개선) ═════════ -->
+  <div class="fcol">
+    <section class="frame d sky" data-doan-frame="sm-share" data-doan-title="03 완성 & 공유 (개선)" data-doan-implements="src/screens/Share.tsx">
+      <div class="stars" data-n="50"></div>
+      <header class="nav">
+        <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</div>
+        <ol class="steps"><li class="done"><i class="gem"></i>1 기분</li><li class="done"><i class="gem"></i>2 꾸미기</li><li class="on"><i class="gem"></i>3 공유</li></ol>
+        <span class="date">2026.11.13 FRI</span>
+      </header>
+      <article class="win card card-pop" data-doan-id="sm-share-card">
+        <div class="top"><span>TODAY'S MOOD</span><span>2026.11.13 FRI</span></div>
+        <span class="slot"><span data-ast id="ast-share" data-enter="land" data-land-at="0.3" data-c-gender="f" data-c-mood="excited" data-label="설레요 기분의 캐릭터"></span></span>
+        <div class="mname"><i class="gem" style="--c:#FF7EB6; width:18px; height:18px"></i>설레요</div>
+        <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="3"></span>
+        <div class="speech">첫 출근 날! 떨리지만 기대돼</div>
+        <div class="foot"><span style="display:flex; gap:8px; align-items:center"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind</span><span style="font:11px/1 var(--f); color:var(--ink-2)">나도 만들기 ▶</span></div>
+      </article>
+      <span class="poke-tip" style="left:336px; top:396px" data-doan-id="sm-share-poke"><i class="ic" data-icon="sparkle" data-c="#FFC94A" data-scale="2"></i>콕 눌러보세요</span>
+      <div class="share-side">
+        <div style="display:flex; gap:14px">
+          <i class="ic" data-icon="sparkle" data-c="#FFC94A" data-ink="#1A1838" data-scale="4"></i><i class="ic" data-icon="star" data-c="#FF7EB6" data-scale="3"></i>
+          <i class="ic" data-icon="sparkle" data-c="#7ED9C3" data-scale="3"></i><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>
+        </div>
+        <h1 class="t-sky">짜잔! 오늘의 내가 완성됐어요</h1>
+        <p class="sub-sky">카드를 보내면 친구도 <span class="hl">움직이는 캐릭터</span>를 바로 볼 수 있어요.</p>
+        <div class="send" data-doan-id="sm-share-send">
+          <span class="tag new newtag" style="right:-10px; top:-12px">NEW</span>
+          <span class="btn big block"><i class="ic" data-icon="chat" data-c="#FFF6E3" data-scale="3"></i>친구에게 보내기</span>
+          <p class="cap">카카오톡 · 메시지 어디든 — 링크만 보내도 캐릭터 카드가 보여요</p>
+        </div>
+        <div class="ratio-row"><span class="lbl">이미지 비율</span><span class="seg"><span class="on">스토리 9:16</span><span>정사각형 1:1</span></span></div>
+        <div class="share-row" data-doan-id="sm-share-more">
+          <span class="btn indigo md"><i class="ic" data-icon="link" data-ink="#FFF6E3" data-scale="2"></i>링크 복사</span>
+          <span class="btn parch md"><i class="ic" data-icon="down" data-scale="2"></i>이미지로 저장</span>
+          <span class="btn parch md soon" data-doan-id="sm-share-insta"><i class="ic" data-icon="camera" data-c="#FF7EB6" data-scale="2"></i>인스타 스토리<span class="tag new soon-tag">Coming soon</span></span>
+        </div>
+        <div class="win friend-pv" data-doan-id="sm-share-preview">
+          <div class="bar"><i class="gem"></i>친구에게는 이렇게 보여요<span class="right"><span class="tag new">NEW</span><span class="tag">/og/&lt;코드&gt;.png</span></span></div>
+          <div class="body">
+            <div class="lp" style="width:206px; flex:none"><div class="img" style="height:108px" data-og-clone="#og-card" data-og-scale="0.4292"></div></div>
+            <p style="font:14px/1.6 var(--f14); color:var(--ink-2)"><b style="color:var(--ink)">오늘 기분은 '설레요'</b><br>첫 출근 날! 떨리지만 기대돼<br><span style="font:11px/1 var(--f); color:var(--ink-3)">링크를 열면 움직이는 캐릭터가 착지해요</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="fcap"><button class="btn parch sm" type="button" data-replay="#ast-share"><i class="ic" data-icon="reset" data-scale="2"></i>착지 다시 보기</button>공유 버튼을 '친구에게 보내기' 하나로 앞세우고, 나머지는 한 줄로. 카드 옆 말풍선은 처음 한 번만 보여줘요.</div>
+  </div>
+
+  <!-- ═════════ 04 공유받은 카드 (개선) ═════════ -->
+  <div class="fcol">
+    <section class="frame d sky" data-doan-frame="sm-view" data-doan-title="04 공유받은 카드 (개선)" data-doan-implements="src/screens/CardView.tsx">
+      <div class="stars" data-n="50"></div>
+      <header class="nav">
+        <div class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</div>
+        <span class="date">2026.11.13 FRI</span>
+      </header>
+      <div class="view-left" data-doan-id="sm-view-copy">
+        <span class="px-art" data-env="open" data-scale="3"></span>
+        <h1 class="t-sky">친구의 오늘 기분이<br>도착했어요</h1>
+        <p class="sub-sky">캐릭터를 콕 눌러보세요, 반응해요!<br>나도 오늘 기분을 닮은 캐릭터를 만들어 답장해볼까요?</p>
+        <div class="view-cta">
+          <span class="btn big">나도 만들기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+          <span class="linkish">이 카드 이미지로 저장 <span class="tag new" style="margin-left:6px">NEW</span></span>
+        </div>
+        <p class="cap">만든 카드를 친구에게 보내면 답장이 돼요</p>
+      </div>
+      <article class="win card card-pop" style="left:776px" data-doan-id="sm-view-card">
+        <div class="top"><span>TODAY'S MOOD</span><span>2026.11.13 FRI</span></div>
+        <span class="slot"><span data-ast id="ast-view" data-enter="land" data-land-at="0.3" data-c-gender="m" data-c-mood="happy" data-c-acc="cap" data-label="행복해요 기분의 캐릭터"></span></span>
+        <div class="mname"><i class="gem" style="--c:#FFD23F; width:18px; height:18px"></i>행복해요</div>
+        <span class="hearts" data-hearts="4" data-c="#FFD23F" data-scale="3"></span>
+        <div class="speech">오늘 점심 떡볶이 성공!</div>
+        <div class="foot"><span style="display:flex; gap:8px; align-items:center"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind</span><span style="font:11px/1 var(--f); color:var(--ink-2)">나도 만들기 ▶</span></div>
+      </article>
+    </section>
+    <div class="fcap"><button class="btn parch sm" type="button" data-replay="#ast-view"><i class="ic" data-icon="reset" data-scale="2"></i>착지 다시 보기</button>데스크톱도 편지 연출(M2)이 먼저 나온 뒤 이 화면이 돼요. '나도 만들기'가 주인공, 저장은 글자 링크로.</div>
+  </div>
+
+  <!-- ═════════ 05 링크 미리보기 ═════════ -->
+  <section class="frame sky" style="width:1280px; height:1330px" data-doan-frame="sm-preview" data-doan-title="05 링크 미리보기 (메신저)">
+    <div class="stars" data-n="40" data-h="200"></div>
+    <div class="pad">
+      <div class="g-head">
+        <span class="tag gold">미리보기</span>
+        <h1 class="t-sky">채팅방에서 친구가 보게 되는 것</h1>
+        <p class="sub-sky">카카오톡 같은 메신저 기준 예시예요. 실제 모양은 앱마다 조금씩 달라요.</p>
+      </div>
+      <div class="pv-cols">
+        <div data-doan-id="sm-pv-now">
+          <div class="pv-h"><span class="tag">지금</span>글 + 긴 링크만</div>
+          <div class="chat">
+            <div class="chat-top"><i class="ic" data-icon="back" data-scale="2"></i>친구</div>
+            <div class="chat-body">
+              <div class="msg">오늘 내 기분은 '설레요' · 첫 출근 날! 떨리지만 기대돼 <span class="url">https://배포주소/#/card/eyJsIjp7ImdlbmRlciI6ImYiLCJtb29kIjoiZXhjaXRlZCIsImZhY2UiOiJleGNpdGVkIiwic2tpbiI6ImxpZ2h0IiwiZXllQ29sb3IiOiJncmF5IiwiaGFpciI6InBvbnl0YWlsIiwiaGFpckNvbG9yIjoiYmxhY2siLCJ0b3AiOiJvZmZzaG91bGRlciIsImJvdHRvbSI6ImxheWVyZWQi…</span></div>
+              <div class="lp"><div class="img empty">미리보기 그림 없음</div><div class="txt"><b>your mind · 오늘의 기분</b>기분을 닮은 픽셀 캐릭터를 꾸미고…<span>배포주소</span></div></div>
+              <span class="time">오후 9:41</span>
+            </div>
+          </div>
+          <ul class="verdict">
+            <li><i class="ic" data-icon="close" data-ink="#FF6B57" data-scale="2"></i>채팅방에선 캐릭터가 안 보여요</li>
+            <li><i class="ic" data-icon="close" data-ink="#FF6B57" data-scale="2"></i>링크가 500자 가까이 돼요</li>
+          </ul>
+        </div>
+        <div data-doan-id="sm-pv-step1">
+          <div class="pv-h"><span class="tag gold">1단계</span>카드 그림 + 짧은 링크</div>
+          <div class="chat">
+            <div class="chat-top"><i class="ic" data-icon="back" data-scale="2"></i>친구</div>
+            <div class="chat-body">
+              <div class="photo">
+                <div class="t"><span>TODAY'S MOOD</span><span>11.13</span></div>
+                <span class="slot" style="width:132px; height:132px"><span class="px-art" data-scene="stage" data-c-gender="f" data-c-mood="excited" data-scale="1.6"></span></span>
+                <div class="n"><i class="gem" style="--c:#FF7EB6"></i>설레요</div>
+              </div>
+              <div class="msg">오늘 내 기분은 '설레요' <span class="url">배포주소/#/c/f3k9a2x7…</span></div>
+              <div class="lp"><div class="img" data-og-clone="#og-default"></div><div class="txt"><b>친구의 오늘 기분이 도착했어요</b>눌러서 캐릭터 만나기<span>배포주소</span></div></div>
+            </div>
+          </div>
+          <ul class="verdict">
+            <li><i class="ic" data-icon="check" data-ink="#7ED9C3" data-scale="2"></i>채팅방에서 바로 캐릭터가 보여요</li>
+            <li><i class="ic" data-icon="check" data-ink="#7ED9C3" data-scale="2"></i>링크가 짧아져요 (40자 안팎)</li>
+            <li><i class="ic" data-icon="close" data-ink="#FFC94A" data-scale="2"></i>미리보기 그림은 모두 같은 대표 그림 · 앱에 따라 글이 빠질 수 있어요</li>
+          </ul>
+        </div>
+        <div data-doan-id="sm-pv-step2">
+          <div class="pv-h"><span class="tag gold">2단계</span>카드마다 다른 미리보기</div>
+          <div class="chat">
+            <div class="chat-top"><i class="ic" data-icon="back" data-scale="2"></i>친구</div>
+            <div class="chat-body">
+              <div class="lp">
+                <div class="img" data-og-clone="#og-card"></div>
+                <div class="txt"><b>오늘 기분은 '설레요'</b>첫 출근 날! 떨리지만 기대돼<span>your mind</span></div>
+                <div class="btns"><span>카드 보기</span><span>나도 만들기</span></div>
+              </div>
+              <span class="time">오후 9:41</span>
+            </div>
+          </div>
+          <ul class="verdict">
+            <li><i class="ic" data-icon="check" data-ink="#7ED9C3" data-scale="2"></i>링크 하나만 보내도 그 캐릭터가 보여요</li>
+            <li><i class="ic" data-icon="check" data-ink="#7ED9C3" data-scale="2"></i>A(카카오 SDK)면 아래 버튼 2개까지</li>
+            <li><i class="ic" data-icon="check" data-ink="#7ED9C3" data-scale="2"></i>B(미리보기 서버)면 모든 메신저에서 (버튼 없음)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="og-row">
+        <div class="og-box">
+          <span class="lbl"><span class="tag gold">1단계</span>대표 미리보기 그림 · 1200×630 (한 장 고정)</span>
+          <div class="og-img og-default sky" id="og-default" data-doan-id="sm-og-default">
+            <div class="stars" data-n="30"></div>
+            <div class="og-t"><span class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="3"></i>your mind</span><b>친구의 오늘 기분이 도착했어요</b></div>
+            <span class="px-art" data-scene="plaza" data-scale="1.5" data-actors='[{"x":70,"look":{"gender":"m","face":"happy"}},{"x":160,"look":{"gender":"f","face":"excited"}},{"x":250,"look":{"gender":"f","face":"calm","hair":"long","hairColor":"blonde","top":"knit","bottom":"skirt","shoes":"loafers","acc":"glasses"}}]'></span>
+          </div>
+        </div>
+        <div class="og-box">
+          <span class="lbl"><span class="tag gold">2단계</span>카드별 미리보기 그림 · 1200×630 (카드마다 생성)</span>
+          <div class="og-img og-card" id="og-card" data-doan-id="sm-og-card">
+            <span class="slot"><span class="px-art" data-scene="stage" data-c-gender="f" data-c-mood="excited" data-scale="2.4"></span></span>
+            <div class="og-r">
+              <span class="k">TODAY'S MOOD · 11.13 FRI</span>
+              <span class="n"><i class="gem" style="--c:#FF7EB6; width:18px; height:18px"></i>설레요</span>
+              <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="2"></span>
+              <span class="speech">첫 출근 날! 떨리지만 기대돼</span>
+              <span class="brand"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind <small>나도 만들기 ▶</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ 모바일 ═════════ -->
+  <div class="phones">
+    <div class="phone-col">
+      <section class="frame m sky" data-doan-frame="sm-m-share" data-doan-title="M1 모바일 · 완성 & 공유 (개선)" data-doan-implements="src/screens/Share.tsx">
+        <div class="stars" data-n="25"></div>
+        <div class="status"><span>9:41</span><span class="batt"></span></div>
+        <div class="m-head"><i class="ic" data-icon="close" data-ink="#CFC8F0" data-scale="3"></i><span>3 / 3</span><span style="width:24px"></span></div>
+        <article class="win m-card card-pop" data-doan-id="sm-m-card">
+          <div class="top"><span>TODAY'S MOOD</span><span>11.13 FRI</span></div>
+          <span class="slot"><span data-ast id="ast-m-share" data-enter="land" data-land-at="0.3" data-c-gender="f" data-c-mood="excited" data-label="설레요 기분의 캐릭터"></span></span>
+          <div class="mname"><i class="gem" style="--c:#FF7EB6"></i>설레요</div>
+          <span class="hearts" data-hearts="3" data-c="#FF7EB6" data-scale="2"></span>
+          <div class="speech">첫 출근 날! 떨리지만 기대돼</div>
+        </article>
+        <div class="m-share" data-doan-id="sm-m-share-actions">
+          <div><span class="btn indigo"><i class="ic" data-icon="link" data-ink="#FFF6E3" data-scale="3"></i></span>링크 복사</div>
+          <div><span class="btn parch soon"><i class="ic" data-icon="camera" data-c="#FF7EB6" data-scale="3"></i><span class="tag new soon-tag">Soon</span></span>스토리</div>
+          <div><span class="btn parch"><i class="ic" data-icon="down" data-scale="3"></i></span>이미지 저장</div>
+          <div><span class="btn parch"><i class="ic" data-icon="back" data-scale="3"></i></span>다시 꾸미기</div>
+        </div>
+        <div class="m-cta" data-doan-id="sm-m-send">
+          <span class="btn block"><i class="ic" data-icon="chat" data-c="#FFF6E3" data-scale="3"></i>친구에게 보내기</span>
+          <span class="cap">링크만 보내도 캐릭터 카드가 보여요</span>
+        </div>
+      </section>
+      <div class="fcap"><button class="btn parch sm" type="button" data-replay="#ast-m-share"><i class="ic" data-icon="reset" data-scale="2"></i>착지 다시 보기</button>맨 아래 큰 버튼이 '이미지로 저장' → '친구에게 보내기'로 바뀌어요. 저장은 위 줄로.</div>
+    </div>
+
+    <div class="phone-col">
+      <section class="frame m sky" data-doan-frame="sm-m-arrive" data-doan-title="M2 모바일 · 친구 링크 도착 (재생)" data-doan-implements="src/screens/CardView.tsx">
+        <div class="tp-host" id="arrive-live" data-arrive data-doan-id="sm-m-arrive-scene" style="position:absolute; inset:0"></div>
+      </section>
+      <div class="fcap"><button class="btn parch sm" type="button" data-replay="#arrive-live"><i class="ic" data-icon="reset" data-scale="2"></i>처음부터 재생</button>편지 → 카드 → 착지까지 2.1초. 화면을 누르면 바로 건너뛰어요. 다 열린 뒤엔 캐릭터를 눌러보세요.</div>
+    </div>
+
+    <div class="phone-col">
+      <section class="frame m sky" data-doan-frame="sm-m-broken" data-doan-title="M3 모바일 · 링크가 깨졌을 때" data-doan-implements="src/screens/CardView.tsx">
+        <div class="stars" data-n="25"></div>
+        <div class="status"><span>9:41</span><span class="batt"></span></div>
+        <div class="m-head"><span class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind</span><span class="date" style="font:11px/1 var(--f)">11.13 FRI</span></div>
+        <div class="broken-title">
+          <h1 class="t-sky">카드를 열 수 없어요</h1>
+          <p class="sub-sky">링크가 잘렸거나 바뀐 것 같아요.<br>보낸 친구에게 다시 받아보세요.</p>
+        </div>
+        <span class="px-art" data-env="empty" data-scale="4" style="position:absolute; left:34px; top:290px" data-doan-id="sm-broken-env"></span>
+        <span style="position:absolute; left:156px; top:250px; width:200px; height:200px"><span data-ast data-c-gender="f" data-c-mood="blank" data-c-bg="none" data-label="멍한 표정의 캐릭터"></span></span>
+        <div class="note" style="position:absolute; left:24px; right:24px; top:500px; font:11px/1.7 var(--f)" data-doan-id="sm-broken-tip"><b style="font:700 14px/1.6 var(--f14)">이럴 때 많이 깨져요 <span class="tag new" style="margin-left:4px">NEW</span></b>링크 일부만 복사했을 때 · 메신저에서 링크가 두 줄로 나뉘었을 때. 짧은 링크로 바꾸면 거의 사라져요.</div>
+        <div class="m-cta"><span class="btn block">나도 만들기 <i class="ic" data-icon="arrow" data-scale="3"></i></span></div>
+      </section>
+      <div class="fcap">깨진 링크도 캐릭터가 '멍—' 하며 안내해요. 제목·설명 문구는 지금 코드와 같고, 아래 도움말만 새로 생겨요.</div>
+    </div>
+  </div>
+
+  <!-- ═════════ 06 구현 메모 ═════════ -->
+  <section class="frame sky" style="width:1280px; height:1000px" data-doan-frame="sm-impl" data-doan-title="06 구현 메모">
+    <div class="stars" data-n="40" data-h="200"></div>
+    <div class="pad">
+      <div class="g-head">
+        <span class="tag gold">구현</span>
+        <h1 class="t-sky">코드로 옮길 때</h1>
+        <p class="sub-sky">1단계는 지금 구조(서버 없음) 그대로 할 수 있어요. 2단계는 배포 위치가 정해진 뒤에.</p>
+      </div>
+      <div class="win impl" data-doan-id="sm-impl-list">
+        <div class="bar"><i class="gem"></i>파일별 할 일</div>
+        <ul class="body">
+          <li><span class="tag gold">1단계</span><code>src/components/Pixel.tsx</code><span><b>LiveStage</b> 추가 — 배경+그림자 / 하체 / 상체(+깜빡) / 이펙트 4겹. 받는 값: look · motion · enter('land') · onPoke</span></li>
+          <li><span class="tag gold">1단계</span><code>src/styles.css</code><span>키프레임(step-end), <code>--u: calc(100cqw / 80)</code>, <code>@media (prefers-reduced-motion: reduce)</code>에서 정지</span></li>
+          <li><span class="tag gold">1단계</span><code>src/pixel/avatar.js</code> · <code>.doan/assets/pixel-avatar-c.js</code><span>감은 눈 프레임 만들기 (눈 뜬 표정만). 그림 코드라 두 곳을 같이 맞춰요.</span></li>
+          <li><span class="tag gold">1단계</span><code>src/screens/Share.tsx</code><span>들어오면 카드 PNG를 미리 만들어 두기(비율 바뀌면 다시). '친구에게 보내기' = 파일+글+링크 공유 → 파일 못 받으면 링크만 → 공유 시트 없으면 링크 복사</span></li>
+          <li><span class="tag gold">1단계</span><code>src/screens/CardView.tsx</code><span>편지 도착 연출(누르면 건너뛰기, 같은 세션 재방문 땐 생략) · 탭 반응 · 깨진 링크 도움말</span></li>
+          <li><span class="tag gold">1단계</span><code>src/app/link.ts</code><span>짧은 코드 v2 <code>#/c/…</code> (값 → 목록 번호). 예전 <code>#/card/</code>도 계속 해석. 왕복 테스트 추가</span></li>
+          <li><span class="tag gold">1단계</span><code>index.html</code> · <code>public/og.png</code><span>og:title · og:description · og:image · twitter:card (대표 그림 1장)</span></li>
+          <li><span class="tag">2단계 A</span><code>카카오 SDK</code><span>uploadImage로 카드 PNG 올리기 → 피드 메시지(버튼 2개). 앱 키 · 도메인 등록 필요</span></li>
+          <li><span class="tag">2단계 B</span><code>엣지 함수 (새 파일)</code><span><code>/c/&lt;코드&gt;</code> → og 태그가 든 HTML + <code>/og/&lt;코드&gt;.png</code>(1200×630, 지금 픽셀 그리기 코드 재사용)</span></li>
+        </ul>
+      </div>
+      <div class="note" style="margin-top:28px"><b>참고</b>이미지 저장(PNG)은 움직이지 않아요. 움직이는 GIF·영상 저장은 다음 단계 후보예요. 이 캔버스의 이펙트 위치·주기는 스크립트의 <code>FX</code> 표 한 곳에서 바꿀 수 있어요.</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 편지 도착 장면 (M2 와 스토리보드가 같이 써요) -->
+<template id="tpl-arrive">
+  <div class="arr">
+    <div class="stars" data-n="25"></div>
+    <div class="status"><span>9:41</span><span class="batt"></span></div>
+    <div class="m-head"><span class="logo"><i class="ic" data-icon="heart" data-c="#FF7EB6" data-scale="2"></i>your mind</span><span class="date" style="font:11px/1 var(--f)">11.13 FRI</span></div>
+    <div class="arr-title">
+      <h1 class="t-sky">친구의 오늘 기분이 도착했어요</h1>
+      <div class="swap"><p class="sub-sky a-wait">두근두근… 봉투를 여는 중</p><p class="sub-sky a-done">캐릭터를 콕 눌러보세요</p></div>
+    </div>
+    <article class="win m-card arr-card">
+      <div class="top"><span>TODAY'S MOOD</span><span>11.13 FRI</span></div>
+      <span class="slot"><span data-ast data-enter="land" data-land-at="1.3" data-c-gender="m" data-c-mood="happy" data-c-acc="cap" data-label="행복해요 기분의 캐릭터"></span></span>
+      <div class="mname"><i class="gem" style="--c:#FFD23F"></i>행복해요</div>
+      <span class="hearts" data-hearts="4" data-c="#FFD23F" data-scale="2"></span>
+      <div class="speech">오늘 점심 떡볶이 성공!</div>
+    </article>
+    <div class="arr-env">
+      <span class="px-art env-o" data-env="open" data-scale="5"></span>
+      <span class="px-art env-c" data-env="closed" data-scale="5"></span>
+      <span class="arr-burst"></span>
+    </div>
+    <div class="m-cta arr-cta">
+      <span class="btn block">나도 만들기 <i class="ic" data-icon="arrow" data-scale="3"></i></span>
+      <span class="cap">만든 카드를 보내면 답장이 돼요</span>
+    </div>
+  </div>
+</template>
+
+<script src="../assets/pixel-avatar.js"></script>
+<script src="../assets/pixel-avatar-c.js"></script>
+<script src="../assets/pixel-scene-c.js"></script>
+<script>
+(function () {
+  const PA = window.PixelAvatar, PC = window.PixelAvatarC, PS = window.PixelSceneC;
+  const INK = '#1A1838';
+  const grid = (w, h) => Array.from({ length: h }, () => Array(w).fill(null));
+  const svgOf = (g, crop) => PA.toSVG(g, crop || [0, 0, g[0].length, g.length]);
+  const pct = v => (v / 80 * 100).toFixed(4) + '%';
+  const stamp = (dst, src, ox, oy) => src.forEach((row, y) => row.forEach((c, x) => {
+    const Y = oy + y, X = ox + x;
+    if (c && Y >= 0 && Y < dst.length && X >= 0 && X < dst[0].length) dst[Y][X] = c;
+  }));
+
+  // ── 별 · 아이콘 · 하트 (C안 캔버스와 같은 방식) ──
+  function drawStars(root) {
+    root.querySelectorAll('.stars').forEach((el, i) => {
+      const host = el.parentElement, w = host.offsetWidth, h = Math.min(host.offsetHeight, Number(el.dataset.h || 9999));
+      let s = (i + 7) * 7919;
+      const r = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+      const out = [];
+      for (let k = 0; k < Number(el.dataset.n || 40); k++) {
+        const x = Math.floor(r() * w / 2) * 2, y = Math.floor(r() * h / 2) * 2, big = r() < 0.12;
+        out.push(`${x}px ${y}px 0 ${big ? 1 : 0}px ${big ? '#FFE6A0' : (r() < 0.5 ? '#FFFFFF' : '#CFC8F0')}`);
+      }
+      el.style.boxShadow = out.join(',');
+    });
+  }
+  function drawHearts(root) {
+    root.querySelectorAll('[data-hearts]').forEach(el => {
+      const n = Number(el.dataset.hearts), s = el.dataset.scale || 2;
+      el.innerHTML = Array.from({ length: 5 }, (_, i) =>
+        `<i class="ic" data-icon="heart" data-ink="#1A1838" data-c="${i < n ? el.dataset.c : '#E2CFA6'}" data-scale="${s}"></i>`).join('');
+    });
+  }
+  const drawIcons = root => root.querySelectorAll('[data-icon]').forEach(PA.renderIcon);
+
+  // ── 모르는 파츠 이름은 기본값으로 (그리기 오류 방지) ──
+  function safeLook(look) {
+    const L = Object.assign({}, look);
+    [['hair', PC.HAIRS], ['top', PC.TOPS], ['bottom', PC.BOTTOMS], ['shoes', PC.SHOES], ['face', PC.FACES], ['hairColor', PC.HAIR]]
+      .forEach(([k, t]) => { if (L[k] != null && !t[L[k]]) delete L[k]; });
+    if (L.acc != null) L.acc = String(L.acc).split(',').filter(a => PC.ACCS[a]).join(',');
+    if (L.bg && L.bg !== 'none' && !PS.BGS[L.bg]) delete L.bg;
+    return L;
+  }
+
+  // ── 깜빡임: 눈 뜬 표정의 눈 줄만 지우고 감은 눈 한 줄을 그려요 ──
+  const EYE_ROWS = { calm: [2, 7], excited: [2, 7], sad: [2, 7], pout: [2, 7], sparkle: [2, 7], shock: [2, 7], angry: [3, 6], blank: [3, 7], smug: [4, 7] };
+  function blinkFace(face, gender) {
+    const r = EYE_ROWS[face];
+    if (!r || !PC.FACES[face]) return null;
+    const id = `${face}-blink-${gender}`;
+    if (!PC.FACES[id]) {
+      const mid = r[0] + Math.ceil((r[1] - r[0]) / 2);
+      const mk = rows => rows.map((row, i) => {
+        if (i < r[0] || i > r[1]) return row;
+        const ch = [...row];
+        for (let x = 0; x < 8; x++) if ('KWEe'.includes(ch[x])) ch[x] = '.';
+        if (i === mid) for (let x = 2; x < 8; x++) ch[x] = 'K';
+        if (gender === 'f' && i === mid - 1) ch[1] = 'K';
+        return ch.join('');
+      });
+      const src = PC.FACES[face];
+      PC.FACES[id] = { name: '깜빡', hidden: true, rows: mk(src.rows), rowsR: src.rowsR ? mk(src.rowsR) : undefined };
+    }
+    return id;
+  }
+
+  // ── 이펙트 스프라이트: 채운 칸만 적으면 바깥선(K)은 자동 ──
+  const SPR = {
+    heart:  { rows: ['wc.cc', 'ccccc', '.ccc.', '..c..'], c: '#FF7EB6' },
+    spark:  { rows: ['.c.', 'cwc', '.c.'], c: '#FFC94A' },
+    note:   { rows: ['..cc', '..c.', '..c.', 'ccc.', 'cc..'], c: '#7ED9C3' },
+    z:      { rows: ['cccc', '..c.', '.c..', 'cccc'], c: '#CFC8F0' },
+    cloud:  { rows: ['..ccc..', '.ccccc.', 'ccccccc', 'ccccccc'], c: '#A9B4CC' },
+    drop:   { rows: ['c', 'c'], c: '#7CC8FF' },
+    anger:  { rows: ['cc.cc', 'c...c', '.....', 'c...c', 'cc.cc'], c: '#FF4F5E' },
+    puff:   { rows: ['.c.', 'ccc'], c: '#FFFFFF' },
+    bubble: { rows: ['ccccccccc', 'ccccccccc', 'ccccccccc', '.c.......'], c: '#FFFFFF' },
+    dot:    { rows: ['c'], c: INK, bare: true },
+  };
+  function sprite(name) {
+    const s = SPR[name], pad = s.bare ? 0 : 1;
+    const w = Math.max(...s.rows.map(r => r.length)) + pad * 2, h = s.rows.length + pad * 2;
+    const g = grid(w, h);
+    s.rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') g[y + pad][x + pad] = ch === 'w' ? '#FFFFFF' : s.c; }));
+    if (!s.bare) {
+      const src = g.map(r => r.slice());
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++)
+        if (!src[y][x] && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => src[y + dy] && src[y + dy][x + dx])) g[y][x] = INK;
+    }
+    return g;
+  }
+
+  // ✍️ 기분별 이펙트 — 어떤 기분에 무엇이 어디서 떠오를지 정하는 곳
+  //    [스프라이트, x, y (80×80 스테이지 칸), 움직임(CSS 클래스), 시작 지연(초)]
+  const FX = {
+    happy:   [['spark', 57, 13, 'twinkle', 0], ['spark', 15, 23, 'twinkle', 0.8], ['spark', 61, 38, 'twinkle', 1.6]],
+    excited: [['heart', 56, 19, 'rise', 0], ['heart', 15, 27, 'rise', 0.7], ['heart', 59, 35, 'rise', 1.4]],
+    calm:    [['note', 56, 16, 'float', 0], ['note', 16, 28, 'float', 1.6]],
+    tired:   [['z', 54, 14, 'zz', 0], ['z', 54, 14, 'zz', 1.5]],
+    sad:     [['cloud', 35, 0, 'hover', 0], ['drop', 37, 7, 'drip', 0], ['drop', 41, 7, 'drip', 0.7]],
+    angry:   [['anger', 55, 12, 'pulse', 0], ['puff', 23, 13, 'puff', 0], ['puff', 51, 9, 'puff', 0.1]],
+    blank:   [['bubble', 53, 5, 'bubble', 0], ['dot', 56, 7, 'dot1', 0], ['dot', 58, 7, 'dot2', 0], ['dot', 60, 7, 'dot3', 0]],
+  };
+  FX.custom = FX.calm;
+  const BURST = [[-14, -3], [14, -3], [-10, -11], [10, -11], [0, -15], [-15, 7], [15, 7], [-5, -17]];
+
+  function fxSpan(name, x, y, cls, vars) {
+    const g = sprite(name);
+    return `<span class="fx ${cls}" style="left:${pct(x)};top:${pct(y)};width:${pct(g[0].length)};height:${pct(g.length)};${vars || ''}">${svgOf(g)}</span>`;
+  }
+
+  // ── 4겹으로 나눠 그리기 ──
+  function layersOf(lookIn) {
+    const look = PS.withMood(safeLook(lookIn));
+    const bg = grid(80, 80);
+    if (look.bg !== 'none') PS.BGS[look.bg].draw(bg, look);
+    stamp(bg, PC.compose(look, { only: ['shadow'] }), 16, 12);
+    const ch = PC.compose(Object.assign({}, look, { shadow: false }));
+    const bf = blinkFace(look.face, look.gender || 'f');
+    const bl = bf ? PC.compose(Object.assign({}, look, { face: bf, shadow: false })) : null;
+    return { look, bg, ch, bl };
+  }
+
+  function mountAst(el) {
+    const L = layersOf(PS.readLook(el));
+    const motion = el.dataset.motion || L.look.mood || 'calm';
+    const enter = el.dataset.enter;
+    const frozen = !!el.dataset.t || !!el.closest('.frozen');
+    el.classList.add('ast', 'mo-' + motion, frozen ? 'frozen' : 'live');
+    if (enter) el.classList.add('enter-' + enter);
+    if (el.dataset.only) el.classList.add('only-' + el.dataset.only);
+    if (el.dataset.t) el.style.setProperty('--t', el.dataset.t + 's');
+    if (el.dataset.landAt) el.style.setProperty('--land-at', el.dataset.landAt + 's');
+    const char = svgOf(L.ch);
+    const fx = (FX[motion] || []).map(([n, x, y, cls, d]) => fxSpan(n, x, y, cls, `--d:${d}s`)).join('');
+    const burst = enter ? BURST.map(([dx, dy]) => fxSpan('spark', 37.5, 41.5, 'burst', `--dx:${dx};--dy:${dy}`)).join('') : '';
+    el.innerHTML =
+      `<span class="ast-bg">${svgOf(L.bg)}</span>` +
+      `<span class="ast-enter"><span class="ast-poke"><span class="ast-char">` +
+        `<span class="ast-lower">${char}</span>` +
+        `<span class="ast-upper">${char}${L.bl ? `<span class="ast-blink">${svgOf(L.bl)}</span>` : ''}</span>` +
+      `</span></span></span>` +
+      `<span class="ast-fx">${fx}${burst}${fxSpan('heart', 44, 10, 'poke-heart')}</span>`;
+    el.setAttribute('role', 'img');
+    if (el.dataset.label) el.setAttribute('aria-label', el.dataset.label);
+  }
+
+  // ── 편지 봉투 (42×36) ──
+  function envelope(state) {
+    const W = 42, H = 36, T = 14, B = H - 1, CX = 21;
+    const g = grid(W, H);
+    const P1 = '#FFF6E3', P2 = '#F6E8C8', P3 = '#E2CFA6', P4 = '#B79E72';
+    const tri = (a, b, c, col) => {
+      const s = (p, q, r) => (p[0] - r[0]) * (q[1] - r[1]) - (q[0] - r[0]) * (p[1] - r[1]);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const p = [x + 0.5, y + 0.5], d1 = s(p, a, b), d2 = s(p, b, c), d3 = s(p, c, a);
+        if (!((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0))) g[y][x] = col;
+      }
+    };
+    const line = (x0, y0, x1, y1, col) => {
+      const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1, dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+      let err = dx + dy;
+      for (;;) {
+        if (y0 >= 0 && y0 < H && x0 >= 0 && x0 < W) g[y0][x0] = col;
+        if (x0 === x1 && y0 === y1) break;
+        const e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+      }
+    };
+    const open = state !== 'closed';
+    if (open) { tri([0, T + 1], [W, T + 1], [CX, 1], P3); line(0, T, 20, 1, INK); line(W - 1, T, 21, 1, INK); }
+    for (let y = T; y <= B; y++) for (let x = 0; x < W; x++) g[y][x] = P1;
+    if (open) { tri([0, T], [W, T], [CX, T + 12], P3); line(1, T + 1, 20, T + 11, P4); line(W - 2, T + 1, 21, T + 11, P4); }
+    tri([0, B + 1], [W, B + 1], [CX, T + 9], P2);
+    line(1, B - 1, 20, T + 10, P4); line(W - 2, B - 1, 21, T + 10, P4);
+    if (!open) { tri([0, T], [W, T], [CX, T + 14], P2); line(0, T, 20, T + 13, INK); line(W - 1, T, 21, T + 13, INK); }
+    for (let x = 0; x < W; x++) { g[T][x] = INK; g[B][x] = INK; }
+    for (let y = T; y <= B; y++) { g[y][0] = INK; g[y][W - 1] = INK; }
+    if (state === 'closed') {
+      ['.cc.cc.', 'cwccccc', 'ccccccc', '.ccccc.', '..ccc..', '...c...'].forEach((r, dy) => [...r].forEach((ch, dx) => {
+        if (ch !== '.') g[T + 8 + dy][18 + dx] = ch === 'w' ? '#FFFFFF' : '#FF7EB6';
+      }));
+    }
+    return g;
+  }
+  function renderEnv(el) {
+    const g = envelope(el.dataset.env), s = Number(el.dataset.scale || 5);
+    el.innerHTML = svgOf(g);
+    el.style.width = g[0].length * s + 'px';
+    el.style.height = g.length * s + 'px';
+  }
+
+  // ── 편지 도착 장면 ──
+  function mountArrive(host) {
+    const t = host.dataset.t;
+    const node = document.getElementById('tpl-arrive').content.firstElementChild.cloneNode(true);
+    node.classList.add(t ? 'frozen' : 'live');
+    if (t) node.style.setProperty('--t', t + 's');
+    // 봉투가 열릴 때 퍼지는 반짝이 (봉투 기준 px 좌표, 1칸 = 4px)
+    node.querySelector('.arr-burst').outerHTML = BURST.map(([dx, dy]) => {
+      const g = sprite('spark');
+      return `<span class="fx burst" style="left:95px;top:58px;width:20px;height:20px;--dx:${dx};--dy:${dy}">${svgOf(g)}</span>`;
+    }).join('');
+    host.innerHTML = '';
+    host.appendChild(node);
+    node.dataset.start = String(performance.now());
+    drawStars(node); drawHearts(node); drawIcons(node);
+    node.querySelectorAll('[data-env]').forEach(renderEnv);
+    node.querySelectorAll('[data-ast]').forEach(mountAst);
+  }
+
+  // ── 그리기 ──
+  drawStars(document); drawHearts(document); drawIcons(document);
+  PC.renderAll(); PS.renderAll();
+  document.querySelectorAll('[data-env]').forEach(renderEnv);
+  document.querySelectorAll('[data-ast]').forEach(mountAst);
+  document.querySelectorAll('[data-arrive]').forEach(mountArrive);
+  document.querySelectorAll('[data-blink-demo]').forEach(el => {
+    const look = PS.withMood(safeLook(PS.readLook(el)));
+    const face = el.dataset.blinkDemo === 'closed' ? blinkFace(look.face, look.gender || 'f') : look.face;
+    el.innerHTML = svgOf(PC.compose(Object.assign({}, look, { face })), PC.CROPS.head);
+    const s = Number(el.dataset.scale || 2.5);
+    el.style.width = 36 * s + 'px'; el.style.height = 40 * s + 'px';
+  });
+  // 미리보기 그림을 메신저 안에 작게 복제
+  document.querySelectorAll('[data-og-clone]').forEach(h => {
+    const src = document.querySelector(h.dataset.ogClone);
+    const c = src.cloneNode(true);
+    c.removeAttribute('id'); c.removeAttribute('data-doan-id');
+    if (h.dataset.ogScale) c.style.transform = `scale(${h.dataset.ogScale})`;
+    h.appendChild(c);
+  });
+
+  // ── 조작: 다시 보기 · 모션 줄이기 · 콕 · 건너뛰기 ──
+  document.querySelectorAll('[data-replay]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll(btn.dataset.replay).forEach(el => {
+      if (el.matches('[data-arrive]')) return mountArrive(el);
+      mountAst(el);
+      const card = el.closest('.card-pop');
+      if (card) { card.classList.remove('card-pop'); void card.offsetWidth; card.classList.add('card-pop'); }
+    });
+  }));
+  document.querySelectorAll('.rm-toggle').forEach(t => t.addEventListener('click', () => {
+    const on = document.body.classList.toggle('rm');
+    document.querySelectorAll('.rm-toggle').forEach(x => x.classList.toggle('on', on));
+  }));
+  document.addEventListener('click', e => {
+    const arr = e.target.closest('.arr.live');
+    if (arr && !arr.dataset.skipped && performance.now() - Number(arr.dataset.start) < 2200) {
+      arr.dataset.skipped = '1';
+      arr.style.setProperty('--t', '2.4s');
+      return;
+    }
+    const ast = e.target.closest('.ast.live');
+    if (!ast || document.body.classList.contains('rm')) return;
+    [ast.querySelector('.ast-poke'), ast.querySelector('.poke-heart')].forEach(n => {
+      n.classList.remove('on'); void n.offsetWidth; n.classList.add('on');
+    });
+  });
+})();
+</script>
+</body>
+</html>

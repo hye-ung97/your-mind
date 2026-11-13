@@ -9,6 +9,9 @@
   --drop:rgba(10,8,30,.35);
   --f:'Galmuri11', ui-monospace, monospace;
   --f14:'Galmuri14', 'Galmuri11', ui-monospace, monospace;
+  --red:#FF6B57;
+  /* 모션 변수 기본값 — 요소마다 인라인으로 덮어써요 (--t 는 위에서 아래로 상속돼야 해서 루트에만 둬요) */
+  --t:0s; --land-at:0s; --d:0s; --dx:0; --dy:0;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -199,13 +202,145 @@ input::placeholder{color:var(--ink-3)}
 .share-side{padding-top:4px}
 .share-side .deco{display:flex; gap:14px}
 .share-side h1{font:700 33px/1.35 var(--f); margin:14px 0 10px}
-.ratio{margin-top:22px}
-.share-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px 24px; margin:26px 0 34px}
-.share-grid .btn{height:58px; justify-content:flex-start; padding:0 18px}
-.share-more{display:flex; gap:28px; align-items:center}
-.card-view{display:flex; flex-direction:column; align-items:center; gap:28px}
-.card-view .center-title{margin-bottom:0}
-.card-view .cta-bar{justify-content:center}
+.share-more{display:flex; gap:28px; align-items:center; margin-top:28px}
+.hl{color:var(--gold); font-weight:700}
+.cap{font:11px/1.6 var(--f); color:var(--lilac)}
+.btn.big{height:64px}
+.btn.md{height:52px; padding:0 14px; font:700 14px/1 var(--f14); gap:8px}
+.card-col{position:relative}
+.send{margin-top:22px; display:flex; flex-direction:column; gap:10px}
+.ratio-row{display:flex; align-items:center; gap:14px; margin-top:26px}
+.ratio-row .lbl{font:14px/1 var(--f14); color:var(--lilac)}
+.share-row{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; margin-top:16px}
+.share-row .btn{position:relative}
+.soon-tag{position:absolute; top:-12px; right:-10px; height:20px; padding:0 6px; background:var(--pink); color:var(--night); font:700 11px/1 var(--f); box-shadow:0 0 0 2px var(--night)}
+.btn.soon:disabled{opacity:1; cursor:not-allowed; color:var(--ink-3); background:var(--parch-2)}
+.btn.soon:disabled .ic{opacity:.45}
+.friend-pv{margin-top:30px}
+.friend-pv .body{display:flex; gap:16px; padding:14px 16px; align-items:center}
+.friend-pv .og{flex:none; width:206px; height:auto; aspect-ratio:1200/630; image-rendering:pixelated; box-shadow:0 0 0 2px var(--night); background:var(--parch-2)}
+.friend-pv p{font:14px/1.6 var(--f14); color:var(--ink-2)}
+.friend-pv p b{color:var(--ink)}
+.friend-pv p span{font:11px/1 var(--f); color:var(--ink-3)}
+.poke-tip{position:absolute; left:232px; top:330px; z-index:4; display:flex; align-items:center; gap:6px; height:30px; padding:0 10px; background:var(--parch);
+  box-shadow:0 0 0 2px var(--night), inset -2px -2px 0 var(--parch-3); font:700 11px/1 var(--f); white-space:nowrap; pointer-events:none}
+.poke-tip::after{content:''; position:absolute; left:-8px; top:50%; margin-top:-5px; width:6px; height:10px; background:var(--night); clip-path:polygon(100% 0, 100% 100%, 0 50%)}
+.send-bar{flex-direction:column; align-items:stretch; gap:8px; text-align:center}
+
+/* 06 공유받은 카드 · 깨진 링크 */
+.view{display:grid; grid-template-columns:minmax(0, 560px) 360px; justify-content:space-around; gap:48px; align-items:center; padding-top:40px}
+.view-left{display:flex; flex-direction:column; align-items:flex-start; gap:14px}
+.view-left h1{font:700 44px/1.3 var(--f)}
+.view-cta{display:flex; align-items:center; gap:28px; margin-top:16px}
+.swap{display:grid}
+.swap > p{grid-area:1 / 1}
+.view-card{position:relative; width:360px; container-type:inline-size}
+.view-card .card{margin:0}
+.arr-pos{position:absolute; left:50%; top:calc(47px + (100cqw - 40px) / 2); width:66%; transform:translate(-50%, -50%); z-index:3; pointer-events:none}
+.arr-env{position:relative; display:block; aspect-ratio:42 / 36; --u:calc(100cqw / 80)}
+.arr-env .env-o,.arr-env .env-c{position:absolute; inset:0}
+.broken{display:flex; flex-direction:column; align-items:center; gap:24px}
+.broken .center-title{margin-bottom:0}
+.broken-scene{display:flex; align-items:flex-end; gap:8px}
+.broken-env{width:168px}
+.broken-char{width:200px; aspect-ratio:1}
+.broken-tip{max-width:420px; font:11px/1.7 var(--f)}
+.broken-tip b{font:700 14px/1.6 var(--f14)}
+.broken .cta-bar{justify-content:center}
+
+/* ════════════ 움직이는 스테이지 (.ast) — 캔버스 share-motion 01 · 02 ════════════
+   80×80 스테이지 = 배경+그림자 / 하체 / 상체(+깜빡) / 이펙트 4겹.
+   --u 는 스테이지 1칸. 이동은 언제나 --u 의 정수배, 타이밍은 step-end (뚝뚝 끊어서 → 픽셀이 번지지 않아요). */
+.ast{position:relative; display:block; width:100%; height:100%; overflow:hidden; cursor:pointer;
+  container-type:inline-size; --u:calc(100cqw / 80); --dl:calc(0s - var(--t, 0s))}
+.ast-bg,.ast-fx{position:absolute; inset:0}
+.ast-enter{position:absolute; left:20%; top:15%; width:60%; height:80%}
+.ast-poke,.ast-char,.ast-lower,.ast-upper,.ast-blink{position:absolute; inset:0}
+.ast-lower{clip-path:inset(73.4375% 0 0 0)}
+.ast-upper{clip-path:inset(0 0 26.5625% 0)}
+.ast-blink{opacity:0}
+.ast svg{display:block; width:100%; height:100%}
+.ast-fx{pointer-events:none}
+.fx{position:absolute; opacity:0}
+
+.ast-upper{animation:breathe 1.6s step-end var(--dl) infinite}
+.ast-blink{animation:blink 3.2s step-end calc(var(--dl) - 1.3s) infinite}
+@keyframes breathe{0%{transform:none} 50%{transform:translateY(var(--u))}}
+@keyframes blink{0%{opacity:0} 91%{opacity:1} 95%{opacity:0}}
+
+.mo-happy .ast-char{animation:hop 2.4s step-end var(--dl) infinite}
+@keyframes hop{0%{transform:none} 68%{transform:translateY(calc(var(--u) * -2))} 73%{transform:translateY(calc(var(--u) * -4))} 80%{transform:translateY(calc(var(--u) * -3))} 86%{transform:translateY(calc(var(--u) * -1))} 90%{transform:none}}
+.mo-excited .ast-char{animation:sway 1.2s step-end var(--dl) infinite}
+@keyframes sway{0%{transform:none} 25%{transform:translateX(var(--u))} 50%{transform:none} 75%{transform:translateX(calc(var(--u) * -1))}}
+.mo-calm .ast-upper,.mo-custom .ast-upper{animation-duration:2.6s}
+.mo-tired .ast-upper{animation:nod 3.2s step-end var(--dl) infinite}
+@keyframes nod{0%{transform:none} 30%{transform:translateY(var(--u))} 45%{transform:translateY(calc(var(--u) * 2))} 84%{transform:translateY(calc(var(--u) * -1))} 88%{transform:none}}
+.mo-sad .ast-upper{animation:slump 2.8s step-end var(--dl) infinite}
+@keyframes slump{0%{transform:translateY(var(--u))} 50%{transform:translateY(calc(var(--u) * 2))}}
+.mo-angry .ast-char{animation:shake 2s step-end var(--dl) infinite}
+@keyframes shake{0%{transform:none} 70%{transform:translateX(var(--u))} 73%{transform:translateX(calc(var(--u) * -1))} 76%{transform:translateX(var(--u))} 79%{transform:translateX(calc(var(--u) * -1))} 82%{transform:translateX(var(--u))} 85%{transform:none}}
+.mo-blank .ast-upper{animation:none}
+.mo-blank .ast-char{animation:tilt 3.6s step-end var(--dl) infinite}
+@keyframes tilt{0%{transform:none} 55%{transform:translateX(var(--u))} 80%{transform:none}}
+
+.fx.twinkle{animation:twinkle 2.4s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes twinkle{0%{opacity:0} 8%{opacity:1} 16%{opacity:0} 24%{opacity:1} 40%{opacity:0}}
+.fx.rise{animation:rise 2.1s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes rise{0%{opacity:0; transform:none} 6%{opacity:1} 20%{transform:translateY(calc(var(--u) * -1))} 35%{transform:translateY(calc(var(--u) * -2))} 50%{transform:translateY(calc(var(--u) * -3))} 65%{transform:translateY(calc(var(--u) * -4)); opacity:1} 78%{opacity:0}}
+.fx.float{animation:float 3.2s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes float{0%{opacity:0; transform:none} 5%{opacity:1} 25%{transform:translate(var(--u), calc(var(--u) * -1))} 50%{transform:translate(0, calc(var(--u) * -2))} 75%{transform:translate(var(--u), calc(var(--u) * -3)); opacity:1} 90%{opacity:0}}
+.fx.zz{animation:zz 3s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes zz{0%{opacity:0; transform:none} 5%{opacity:1} 20%{transform:translate(var(--u), calc(var(--u) * -2))} 40%{transform:translate(calc(var(--u) * 2), calc(var(--u) * -4))} 60%{transform:translate(calc(var(--u) * 3), calc(var(--u) * -6)); opacity:1} 75%{opacity:0}}
+.fx.hover{opacity:1; animation:hover 2.8s step-end var(--dl) infinite}
+@keyframes hover{0%{transform:none} 50%{transform:translateY(calc(var(--u) * -1))}}
+.fx.drip{animation:drip 1.4s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes drip{0%{opacity:1; transform:none} 25%{transform:translateY(var(--u))} 50%{transform:translateY(calc(var(--u) * 2))} 75%{transform:translateY(calc(var(--u) * 3)); opacity:0}}
+.fx.pulse{animation:pulse 2s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes pulse{0%{opacity:0} 66%{opacity:1} 74%{opacity:0} 78%{opacity:1} 92%{opacity:0}}
+.fx.puff{animation:puff 2s step-end calc(var(--dl) + var(--d, 0s)) infinite}
+@keyframes puff{0%{opacity:0; transform:none} 70%{opacity:1} 78%{transform:translateY(calc(var(--u) * -1))} 86%{transform:translateY(calc(var(--u) * -2))} 94%{opacity:0}}
+.fx.bubble{animation:bubbleK 3.6s step-end var(--dl) infinite}
+@keyframes bubbleK{0%{opacity:0} 10%{opacity:1} 88%{opacity:0}}
+.fx.dot1{animation:dot1 3.6s step-end var(--dl) infinite}
+.fx.dot2{animation:dot2 3.6s step-end var(--dl) infinite}
+.fx.dot3{animation:dot3 3.6s step-end var(--dl) infinite}
+@keyframes dot1{0%{opacity:0} 22%{opacity:1} 88%{opacity:0}}
+@keyframes dot2{0%{opacity:0} 34%{opacity:1} 88%{opacity:0}}
+@keyframes dot3{0%{opacity:0} 46%{opacity:1} 88%{opacity:0}}
+
+/* 등장: 착지 + 반짝 · 카드 튀어 오르기 */
+.enter-land .ast-enter{animation:land .9s step-end calc(var(--land-at, 0s) + var(--dl)) both}
+@keyframes land{0%{opacity:0; transform:translateY(calc(var(--u) * -48))} 6%{opacity:1} 10%{transform:translateY(calc(var(--u) * -36))} 20%{transform:translateY(calc(var(--u) * -24))} 30%{transform:translateY(calc(var(--u) * -12))} 40%{transform:translateY(var(--u))} 50%{transform:translateY(calc(var(--u) * -3))} 62%{transform:translateY(calc(var(--u) * -1))} 72%{transform:none} 100%{opacity:1; transform:none}}
+.fx.burst{animation:burst .45s step-end calc(var(--land-at, 0s) + .36s + var(--dl)) both}
+@keyframes burst{0%{opacity:0; transform:none} 2%{opacity:1} 30%{transform:translate(calc(var(--u) * var(--dx) * .4), calc(var(--u) * var(--dy) * .4))} 60%{transform:translate(calc(var(--u) * var(--dx) * .8), calc(var(--u) * var(--dy) * .8))} 85%{opacity:0; transform:translate(calc(var(--u) * var(--dx)), calc(var(--u) * var(--dy)))} 100%{opacity:0}}
+.card-pop{animation:pop .3s step-end backwards}
+@keyframes pop{0%{opacity:0; visibility:hidden; transform:translateY(24px)} 33%{opacity:1; visibility:visible; transform:translateY(12px)} 66%{transform:translateY(4px)} 100%{transform:none}}
+
+/* 콕 */
+.ast-poke.on{animation:poke .5s step-end}
+@keyframes poke{0%{transform:translateY(calc(var(--u) * -2))} 20%{transform:translateY(calc(var(--u) * -4))} 45%{transform:translateY(calc(var(--u) * -3))} 65%{transform:translateY(calc(var(--u) * -1))} 80%{transform:none}}
+.fx.poke-heart.on{animation:rise 1s step-end}
+
+/* 편지 도착 (공유 링크로 들어왔을 때 한 번) — 시간표는 캔버스 02 와 같아요 */
+.arrive{--dl:calc(0s - var(--t, 0s))}
+.arrive .card-arr{animation:pop .3s step-end calc(1s + var(--dl)) backwards}
+.arrive .cta-arr{animation:pop .3s step-end calc(1.7s + var(--dl)) backwards}
+.arrive .a-wait{animation:on 1.3s step-end var(--dl)}
+.arrive .a-done{animation:off 1.3s step-end var(--dl)}
+.a-wait{opacity:0}
+@keyframes on{0%,100%{opacity:1}}
+@keyframes off{0%,100%{opacity:0}}
+.arr-env{opacity:0; animation:env 1.3s step-end var(--dl)}
+@keyframes env{0%{opacity:1; transform:translateY(-64px)} 7%{transform:translateY(-40px)} 14%{transform:translateY(-16px)} 21%{transform:translateY(4px)} 28%{transform:none} 33%{transform:translateX(-4px)} 38%{transform:translateX(4px)} 43%{transform:translateX(-4px)} 48%{transform:translateX(4px)} 53%{transform:none} 77%{transform:translateY(12px)} 83%{transform:translateY(32px)} 89%{transform:translateY(60px); opacity:1} 94%{opacity:0} 100%{opacity:0}}
+.arr-env .env-c{opacity:0; animation:on .72s step-end var(--dl)}
+.arr-env .env-o{animation:off .72s step-end var(--dl)}
+.arr-env .fx.burst{animation:burst .45s step-end calc(.72s + var(--dl)) both}
+
+/* 기기에서 '동작 줄이기'를 켰다면: 정지 그림, 등장 연출 없이 바로 */
+@media (prefers-reduced-motion: reduce){
+  .ast *,.card-pop,.card-arr,.cta-arr,.a-wait,.a-done{animation:none !important}
+  .arr-pos{display:none}
+}
 
 /* ════════════ 좁은 화면 (캔버스 M1~M4) ════════════ */
 @media (max-width: 1180px){
@@ -279,12 +414,25 @@ input::placeholder{color:var(--ink-3)}
   .card .mname{font-size:22px; margin:16px 0 8px}
   .share-side{margin-top:28px}
   .share-side h1{font-size:22px}
-  .share-grid{gap:16px; margin:20px 0 24px}
-  .share-grid .btn{height:52px; font-size:14px; padding:0 12px}
-  .share-grid .btn.save{grid-column:1 / -1}
-  .share-more{justify-content:space-between}
+  .share-more{justify-content:space-between; margin-top:24px}
+  .ratio-row{margin-top:18px}
+  .share-row{gap:14px; margin-top:14px}
+  .share-row .btn{height:64px; flex-direction:column; gap:6px; padding:0 6px; font-size:11px}
+  .soon-tag{top:-10px; right:-6px; font-size:10px; height:18px}
+  .send-bar .cap{font-size:11px}
+  .view{display:flex; flex-direction:column; align-items:stretch; gap:20px; padding-top:14px}
+  .view-left h1{font-size:22px}
+  .view-left{gap:6px}
+  .view-card{width:min(320px, 100%); margin:0 auto}
+  .arr-pos{top:calc(39px + (100cqw - 30px) / 2)}
+  .cta-bar.cta-arr{flex-direction:column; align-items:stretch; gap:8px; text-align:center}
+  .send-bar .btn,.cta-bar.cta-arr .btn{flex:none}
+  .broken{gap:18px}
+  .broken .center-title{align-items:center; text-align:center}
+  .broken-env{width:132px}
+  .broken-char{width:160px}
+  .broken .cta-bar{position:fixed}
 }
 @media (max-width: 420px){
-  .share-grid{grid-template-columns:1fr}
   .tab{font-size:10px}
 }

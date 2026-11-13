@@ -1,19 +1,11 @@
 import type { AppCtx } from '../App';
 import { go } from '../App';
+import { PLAZA_ACTORS as ACTORS } from '../app/actors';
 import { encodeCard } from '../app/link';
 import { koDate } from '../app/model';
 import { Gem, Icon, Nav, PixelArt, Stars } from '../components/Pixel';
 import * as PS from '../pixel/scene.js';
-import type { Look } from '../pixel/types';
 
-// 광장에 서 있는 다섯 친구 (캔버스 01 랜딩과 같은 구성)
-const ACTORS: { x: number; mood: string; look: Look }[] = [
-  { x: 40, mood: 'happy', look: { gender: 'm', face: 'happy' } },
-  { x: 100, mood: 'excited', look: { gender: 'f', face: 'excited' } },
-  { x: 160, mood: 'tired', look: { gender: 'f', face: 'tired', hair: 'bob', hairColor: 'pink', top: 'pajama', bottom: 'pjpants', shoes: 'slippers', acc: 'beanie' } },
-  { x: 220, mood: 'sad', look: { gender: 'm', face: 'sad', hair: 'dandy', hairColor: 'black', top: 'hoodie', shoes: 'boots', acc: 'phones' } },
-  { x: 280, mood: 'calm', look: { gender: 'f', face: 'calm', hair: 'long', hairColor: 'blonde', top: 'knit', bottom: 'skirt', shoes: 'loafers', acc: 'glasses' } },
-];
 const PLAZA = PS.plaza(ACTORS);
 
 // '예시 둘러보기' 카드

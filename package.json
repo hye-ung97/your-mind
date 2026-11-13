@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit && vite build && vite build --ssr server/main.ts --outDir dist-server",
+    "start": "node dist-server/main.js",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
     "favicon": "node scripts/favicon.mjs"
   },
   "dependencies": {
@@ -17,6 +18,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
@@ -24,5 +26,8 @@
     "typescript": "^5.6.3",
     "vite": "^5.4.21",
     "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

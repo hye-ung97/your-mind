@@ -14,7 +14,20 @@ export type Route = '' | 'start' | 'mood' | 'edit' | 'share' | `card/${string}`;
 function readHash(): Route {
   return location.hash.replace(/^#\/?/, '') as Route;
 }
+/** 화면 주소: 보통은 해시(#/edit), 공유 링크로 들어오면 경로(/c/<코드>) */
+function readRoute(): Route {
+  const h = readHash();
+  if (h) return h;
+  const m = /^\/c\/([A-Za-z0-9_-]+)\/?$/.exec(location.pathname);
+  return m ? (`card/${m[1]}` as const) : '';
+}
 export function go(r: Route) {
+  // 공유 링크(/c/…)에서 다른 화면으로 갈 땐 주소를 처음(/)으로 돌려놓고 해시로 이어가요
+  if (location.pathname !== '/') {
+    history.pushState(null, '', `/#/${r}`);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    return;
+  }
   if (readHash() === r) return;
   location.hash = `/${r}`;
 }
@@ -29,16 +42,17 @@ export interface AppCtx {
 }
 
 export default function App() {
-  const [route, setRoute] = useState<Route>(readHash);
+  const [route, setRoute] = useState<Route>(readRoute);
   const [saved, setSaved] = useState<Saved>(load);
   const [toastMsg, setToastMsg] = useState('');
   const toastTimer = useRef<number>();
   const today = useMemo(() => new Date(), []);
 
   useEffect(() => {
-    const on = () => { setRoute(readHash()); window.scrollTo(0, 0); };
+    const on = () => { setRoute(readRoute()); window.scrollTo(0, 0); };
     window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
+    window.addEventListener('popstate', on);
+    return () => { window.removeEventListener('hashchange', on); window.removeEventListener('popstate', on); };
   }, []);
   useEffect(() => save(saved), [saved]);
 
@@ -68,8 +82,8 @@ export default function App() {
   let screen: JSX.Element;
   const needsGender = (r: Route) => (r === 'mood' || r === 'edit' || r === 'share') && !saved.gender;
   if (route.startsWith('card/')) {
-    const card = decodeCard(route.slice(5));
-    screen = <CardView ctx={ctx} card={card} onMake={begin} />;
+    const code = route.slice(5);
+    screen = <CardView key={code} ctx={ctx} code={code} card={decodeCard(code)} onMake={begin} />;
   } else if (needsGender(route) || route === 'start') {
     screen = <Start ctx={ctx} onPick={chooseGender} />;
   } else if (route === 'mood') {
